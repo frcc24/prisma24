@@ -11,7 +11,7 @@ const List<Color> kBoardPalette = [
   Color.fromARGB(255, 116, 108, 41),
   Colors.green,
   Colors.blue,
-  Colors.indigo,
+  Color.fromARGB(255, 38, 48, 103),
   Color.fromARGB(255, 103, 26, 116),
 ];
 
