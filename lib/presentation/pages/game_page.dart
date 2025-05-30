@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/sfx.dart';
 import '../../domain/models/game_state.dart';
@@ -61,6 +62,11 @@ class GamePage extends ConsumerWidget {
       .add({'name': name, 'score': score, 'ts': FieldValue.serverTimestamp()});
 
   /* ───────── Diálogo de fim ───────── */
+  Future<String> getPlayerName() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString('player_name') ?? 'Jogador';
+}
+
   void _showEndDialog(
       BuildContext context, WidgetRef ref, bool won, int elapsed) {
       final base   = ref.read(gameProvider.notifier).baseTiles;
@@ -69,7 +75,11 @@ class GamePage extends ConsumerWidget {
       final pen    = elapsed ~/ 3;
       final total  = base + bonus - pen;
 
-    saveScore('teste', total);
+      getPlayerName().then((name) {
+        if (won) {
+          saveScore(name, total);
+        }
+      });
 
     showDialog(
       context: context,

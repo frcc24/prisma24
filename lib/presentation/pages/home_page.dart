@@ -55,7 +55,7 @@ class HomePage extends StatelessWidget {
                 color: Colors.orange,
                 label: 'Configurações',
                 icon: Icons.settings,
-                onTap: () {}, // TODO
+                onTap: () => Navigator.pushNamed(context, '/settings'),
               ),
                 _MenuButton(
                 color: Colors.red,
