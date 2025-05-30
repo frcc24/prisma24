@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'presentation/pages/home_page.dart';
 import 'presentation/pages/game_page.dart';
 import 'firebase_options.dart';
+import 'presentation/pages/leaderboard_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +35,8 @@ class Prisma24App extends StatelessWidget {
       routes: {
         '/':      (_) => const HomePage(),
         '/game':  (_) => const GamePage(),
+          '/rank':  (_) => const LeaderboardPage(),   // ← novo
+
       },
     );
   }

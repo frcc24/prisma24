@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
@@ -54,6 +55,11 @@ class GamePage extends ConsumerWidget {
     );
   }
 
+    Future<void> saveScore(String name, int score) =>
+      FirebaseFirestore.instance
+      .collection('scores')
+      .add({'name': name, 'score': score, 'ts': FieldValue.serverTimestamp()});
+
   /* ───────── Diálogo de fim ───────── */
   void _showEndDialog(
       BuildContext context, WidgetRef ref, bool won, int elapsed) {
@@ -62,6 +68,8 @@ class GamePage extends ConsumerWidget {
       final bonus  = (10 * base / max(moves, 1)).floor();
       final pen    = elapsed ~/ 3;
       final total  = base + bonus - pen;
+
+    saveScore('teste', total);
 
     showDialog(
       context: context,

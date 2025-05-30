@@ -49,7 +49,7 @@ class HomePage extends StatelessWidget {
                 color: Colors.blue,
                 label: 'Placares',
                 icon: Icons.bar_chart,
-                onTap: () {}, // TODO
+                onTap: () => Navigator.pushNamed(context, '/rank'),
               ),
               _MenuButton(
                 color: Colors.orange,
