@@ -11,11 +11,16 @@ final gameProvider =
 
 class GameController extends StateNotifier<GameState> {
   GameController() : super(GameState.initial());
+  int _baseTiles = 1; // começa com a peça inicial
+  int _movesUsed = 0; // incrementa a cada jogada válida
 
   /* ──────────────── Estados internos ──────────────── */
   final List<GameState> _history = [];
   bool _awaitingBombTarget = false;
   bool get isAwaitingBomb => _awaitingBombTarget;
+// getters públicos
+int get baseTiles => _baseTiles;
+int get movesUsed => _movesUsed;
 
   /* ─────────────── Jogada normal ─────────────── */
   void playTurn(int newColor) {
@@ -44,6 +49,13 @@ class GameController extends StateNotifier<GameState> {
     final movesLeft = state.movesLeft - 1;
     final lost = !won && movesLeft == 0;
 
+
+// ➜ calcula quantos novos tiles entraram neste turno
+final oldCount = _territorySize(state.board, state.selectedColor);
+final newCount = _territorySize(board, newColor);
+_baseTiles += (newCount - oldCount); // acumula
+_movesUsed += 1;
+
     // calcula pontuação se venceu
     int _calcScore() {
       final seconds = DateTime.now().difference(state.startTime).inSeconds;
@@ -65,6 +77,25 @@ class GameController extends StateNotifier<GameState> {
       score: won ? _calcScore() : 0,
     );
   }
+
+
+// utilitário local (mesma lógica do GamePage)
+int _territorySize(List<List<Piece>> b, int colorIdx) {
+  final visited = <Point<int>>{};
+  final queue = <Point<int>>[const Point(0, 0)];
+  while (queue.isNotEmpty) {
+    final p = queue.removeLast();
+    if (!visited.add(p)) continue;
+    for (final d in kHexDirs) {
+      final n = Point(p.x + d.x, p.y + d.y);
+      if (n.x >= 0 && n.y >= 0 && n.x < b.first.length && n.y < b.length &&
+          b[n.y][n.x].colorIndex == colorIdx && !visited.contains(n)) {
+        queue.add(n);
+      }
+    }
+  }
+  return visited.length;
+}
 
   /* ─────────────── Power-up Undo ─────────────── */
   void useUndo() {
@@ -112,6 +143,9 @@ class GameController extends StateNotifier<GameState> {
   void reset() {
     _history.clear();
     _awaitingBombTarget = false;
+    _baseTiles = 1;
+    _movesUsed = 0;
+
     state = GameState.initial();
   }
 
@@ -178,4 +212,5 @@ class GameController extends StateNotifier<GameState> {
 
   List<List<Piece>> _cloneBoard(List<List<Piece>> src) =>
       [for (final row in src) [for (final piece in row) piece.copyWith()]];
+
 }

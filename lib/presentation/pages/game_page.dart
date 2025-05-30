@@ -8,7 +8,6 @@ import 'package:lottie/lottie.dart';
 
 import '../../core/sfx.dart';
 import '../../domain/models/game_state.dart';
-import '../../domain/models/piece.dart';
 import '../providers/game_provider.dart';
 import '../widgets/hex_board.dart';
 
@@ -58,19 +57,32 @@ class GamePage extends ConsumerWidget {
   /* ───────── Diálogo de fim ───────── */
   void _showEndDialog(
       BuildContext context, WidgetRef ref, bool won, int elapsed) {
+      final base   = ref.read(gameProvider.notifier).baseTiles;
+      final moves  = ref.read(gameProvider.notifier).movesUsed;
+      final bonus  = (10 * base / max(moves, 1)).floor();
+      final pen    = elapsed ~/ 3;
+      final total  = base + bonus - pen;
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
         backgroundColor: Colors.black87,
         title: Text(won ? 'Você venceu!' : 'Fim das jogadas'),
-        content: Text(won
-            ? 'Tempo: ${_formatSeconds(elapsed)}\nTodos os hexágonos conquistados!'
-            : 'Acabaram as jogadas.\nTempo: ${_formatSeconds(elapsed)}'),
+        content: Text(
+          'Base: $base'
+          '\nBônus eficiência: +$bonus'
+          '\nPenalização tempo: −$pen'
+          '\n-------------------------'
+          '\nTOTAL: $total',
+        ),
+
         actions: [
           TextButton(
             onPressed: () {
               ref.read(gameProvider.notifier).reset();
+              // ignore: unused_result
+              ref.refresh(elapsedProvider);
               Navigator.of(context).pop();
             },
             child: const Text('Novo jogo'),
@@ -103,7 +115,10 @@ class GamePage extends ConsumerWidget {
         );
 
     /* calcula score: nº de peças do território */
-    final int score = _territorySize(game.board, game.selectedColor);
+  final base = controller.baseTiles;
+  final bonus = (10 * base / max(controller.movesUsed, 1)).floor();
+  final currentScore = base + bonus;   // sem penalidade de tempo ainda
+
 
     return Scaffold(
       appBar: AppBar(
@@ -122,10 +137,15 @@ class GamePage extends ConsumerWidget {
                       Sfx().tap();
                     },
             ),
-            _ResetButton(onPressed: () {
-              controller.reset();
-              Sfx().tap();
-            }),
+            _ResetButton(
+              onPressed: () {
+                controller.reset();                 // zera estado do jogo
+                // ignore: unused_result              
+                ref.refresh(elapsedProvider);       // reinicia cronômetro
+                Sfx().tap();                        // som
+              },
+            ),
+
           ],
         ),
         actions: [
@@ -165,7 +185,7 @@ class GamePage extends ConsumerWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
-              Text('Tempo: $elapsed   ·   Pontos: $score',
+              Text('Tempo: $elapsed   ·   Pontos: $currentScore',
                   style: Theme.of(context).textTheme.bodyMedium),
               if (controller.isAwaitingBomb)
                 const Padding(
@@ -229,26 +249,6 @@ class GamePage extends ConsumerWidget {
     return '$m:$s';
   }
 
-  int _territorySize(List<List<Piece>> board, int colorIdx) {
-    final visited = <Point<int>>{};
-    final queue = <Point<int>>[const Point(0, 0)];
-    while (queue.isNotEmpty) {
-      final p = queue.removeLast();
-      if (!visited.add(p)) continue;
-      for (final dir in kHexDirs) {
-        final n = Point(p.x + dir.x, p.y + dir.y);
-        if (n.x >= 0 &&
-            n.y >= 0 &&
-            n.x < board.first.length &&
-            n.y < board.length &&
-            !visited.contains(n) &&
-            board[n.y][n.x].colorIndex == colorIdx) {
-          queue.add(n);
-        }
-      }
-    }
-    return visited.length;
-  }
 }
 
 /* ───────────────── Botões auxiliares ───────────────── */
