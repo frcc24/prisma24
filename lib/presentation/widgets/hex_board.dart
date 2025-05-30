@@ -12,7 +12,7 @@ const List<Color> kBoardPalette = [
   Colors.green,
   Colors.blue,
   Colors.indigo,
-  Colors.purple,
+  Color.fromARGB(255, 103, 26, 116),
 ];
 
 class HexBoard extends StatefulWidget {
