@@ -8,7 +8,7 @@ import 'presentation/pages/prism_game/game_page.dart';
 import 'firebase_options.dart';
 import 'presentation/pages/general_pages/leaderboard_page.dart';
 import 'presentation/pages/general_pages/settings_page.dart';
-import 'presentation/pages/tango_game/tango_board_controller.dart';
+import 'presentation/pages/tango_game/tango_board_controller.dart' show TangoBoardController;
 import 'presentation/pages/tango_game/tango_board_page.dart';
 
 void main() async {
@@ -28,7 +28,7 @@ class Prisma24App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    Get.put(TangBoardController());
+    Get.put(TangoBoardController());
 
     return GetMaterialApp(
       title: 'Prisma 24',

@@ -1,9 +1,13 @@
+// tango_board_controller.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class TangBoardController extends GetxController {
+class TangoBoardController extends GetxController {
   /// Dimensão do tabuleiro (NxN)
-  int sizeN = 0;
+  final RxInt sizeN = 0.obs;
+
+  final isLoading = false.obs;
 
   /// Matriz inicial (0=vazio, 1=moon, 2=triangle) enviada ao chamar initBoard
   late List<List<int>> initialMatrix;
@@ -12,54 +16,79 @@ class TangBoardController extends GetxController {
   late List<List<int>> solutionMatrix;
 
   /// Matriz atual que o usuário vai preenchendo
-  late List<List<int>> currentMatrix;
+  /// Cada elemento de currentMatrix é uma List<int> simples, mas o "container" é reativo (RxList).
+  final RxList<List<int>> currentMatrix = <List<int>>[].obs;
 
-@override
+  @override
   void onInit() {
-
-    initBoard(
-      4,
-  [
-    [1, 0, 2, 2],
-    [1, 0, 1, 2],
-    [2, 0, 2, 1],
-    [2, 0, 1, 1],
-  ],
-  [
-    [1, 1, 2, 2],
-    [1, 2, 1, 2],
-    [2, 1, 2, 1],
-    [2, 2, 1, 1],
-  ],
-    );
-
     super.onInit();
+
+    // Se quiser testar sem parâmetros externos, pode inicializar aqui:
+    // initBoard(
+    //   4,
+    //   [
+    //     [1, 0, 2, 0],
+    //     [1, 0, 1, 0],
+    //     [2, 0, 0, 1],
+    //     [2, 0, 0, 1],
+    //   ],
+    //   [
+    //     [1, 1, 2, 2],
+    //     [1, 2, 1, 2],
+    //     [2, 1, 2, 1],
+    //     [2, 2, 1, 1],
+    //   ],
+    // );
+
+    initBoard(6, 
+      // Puzzle 4
+  [
+    [1, 2, 1, 1, 2, 2],
+    [2, 1, 0, 2, 1, 2],
+    [1, 1, 2, 1, 2, 1],
+    [1, 2, 1, 0, 1, 2],
+    [2, 1, 2, 1, 0, 1],
+    [2, 2, 1, 2, 1, 0],
+  ],
+    // Puzzle 4
+  [
+    [1, 2, 1, 1, 2, 2],
+    [2, 1, 2, 2, 1, 2],
+    [1, 1, 2, 1, 2, 1],
+    [1, 2, 1, 2, 1, 2],
+    [2, 1, 2, 1, 2, 1],
+    [2, 2, 1, 2, 1, 1],
+  ], 
+    
+    );
   }
 
+  /// Inicializa o tabuleiro com:
+  /// - n: tamanho NxN
+  /// - initial: matriz pré-preenchida (0 = vazio, 1 = moon, 2 = triangle)
+  /// - solution: matriz solução completa (1 ou 2 em todas as posições)
+  void initBoard(int n, List<List<int>> initial, List<List<int>> solution) {
+    // 1) Define o tamanho
+    sizeN.value = n;
 
-
-  void initBoard(
-    int n,
-    List<List<int>> initial,
-    List<List<int>> solution,
-  ) {
-    sizeN = n;
+    // 2) Armazena as matrizes recebidas
     initialMatrix = initial;
     solutionMatrix = solution;
 
-    // Cria uma cópia profunda de initialMatrix em currentMatrix
-    currentMatrix = List.generate(
-      sizeN,
-      (i) => List<int>.from(initialMatrix[i]),
-    );
+    // 3) Cria currentMatrix como cópia profunda de initialMatrix, mas cada linha é uma List<int> normal.
+    currentMatrix.clear();
+    for (var row in initialMatrix) {
+      currentMatrix.add(List<int>.from(row));
+    }
+    // Agora currentMatrix é um RxList<List<int>> contendo linhas mutáveis.
 
-    update(); // notifica GetBuilder/Obx para reconstruir UI
+    // Não precisa chamar update(), pois usamos Obx() para ouvir currentMatrix e sizeN automaticamente.
   }
 
-  /// Retorna true se currentMatrix == solutionMatrix
+  /// Verifica se a state atual bate com a matrix solução
   bool _checkCompletion() {
-    for (int i = 0; i < sizeN; i++) {
-      for (int j = 0; j < sizeN; j++) {
+    for (int i = 0; i < sizeN.value; i++) {
+      for (int j = 0; j < sizeN.value; j++) {
         if (currentMatrix[i][j] != solutionMatrix[i][j]) {
           return false;
         }
@@ -68,28 +97,37 @@ class TangBoardController extends GetxController {
     return true;
   }
 
-  /// Cicla o estado de uma célula do tabuleiro:
-  /// 0 -> 1 (moon) -> 2 (triangle) -> 0
+  /// Cicla o estado de uma célula: 0 -> 1 -> 2 -> 0
   void cycleTile(int row, int col) {
-    // Se veio pré-preenchido, bloqueia alteração
+    isLoading.value = true;
+    // 1) Se veio pré-preenchido, bloqueia alteração
     if (initialMatrix[row][col] != 0) return;
 
-    currentMatrix[row][col] = (currentMatrix[row][col] + 1) % 3;
-    update();
+    isLoading.value = false;
 
+    // 2) Calcula novo valor (0,1,2)
+    int novoValor = (currentMatrix[row][col] + 1) % 3;
+
+    // 3) Atribui diretamente na lista interna
+    currentMatrix[row][col] = novoValor;
+
+    // 4) Para que Obx saiba que a matriz inteira mudou, chamamos refresh() no RxList
+    currentMatrix.refresh();
+
+    // 5) Se terminado, exibe o diálogo
     if (_checkCompletion()) {
-      // Se completou, exibe alerta via Get.dialog
       Get.dialog(
         AlertDialog(
           title: const Text('Parabéns!'),
           content: const Text('Você completou o puzzle!'),
           actions: [
             TextButton(
-              onPressed: () => Get.back(), // fecha o diálogo
+              onPressed: () => Get.back(),
               child: const Text('OK'),
             ),
           ],
         ),
+        barrierDismissible: false,
       );
     }
   }
