@@ -34,18 +34,22 @@ class TangoBoardController extends GetxController {
 
     // Se quiser testar sem parâmetros externos, pode inicializar aqui:
     initBoard(
-      4,
+      6,
       [
-        [1, 0, 2, 0],
-        [1, 0, 1, 0],
-        [2, 0, 0, 1],
-        [2, 0, 0, 1],
+        [1, 0, 2, 0, 0, 0],
+        [1, 0, 1, 0, 0, 0],
+        [2, 0, 0, 1, 0, 0],
+        [2, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
       ],
       [
-        [1, 1, 2, 2],
-        [1, 2, 1, 2],
-        [2, 1, 2, 1],
-        [2, 2, 1, 1],
+        [1, 1, 2, 2, 1, 2],
+        [1, 2, 1, 2, 1, 2],
+        [2, 1, 2, 1, 2, 1],
+        [2, 2, 1, 1, 2, 1],
+        [1, 1, 2, 2, 1, 2],
+        [2, 2, 1, 1, 2, 1],
       ],
     );
 
@@ -248,6 +252,25 @@ class TangoBoardController extends GetxController {
       );
     }
   }
+  /// No TangoBoardController:
+void resetBoard() {
+  isLoading.value = true;
+  // 1) Redefine currentMatrix como cópia profunda de initialMatrix
+  currentMatrix.clear();
+  for (var row in initialMatrix) {
+    currentMatrix.add(List<int>.from(row));
+  }
+  currentMatrix.refresh();
+
+  // 2) Oculta todas as dicas existentes (sem gerar novas)
+  for (var h in hints) {
+    h.hidden = true;
+  }
+  hints.refresh();
+  isLoading.value = false;
+}
+
+
 }
 
 

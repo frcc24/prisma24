@@ -1,8 +1,9 @@
 // tango_board_page.dart
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:math' as math;
 import 'tango_board_controller.dart';
 
 class TangoBoardPage extends StatelessWidget {
@@ -24,19 +25,65 @@ class TangoBoardPage extends StatelessWidget {
             },
             tooltip: 'Mostrar dica',
           ),
+          IconButton(
+            icon: const Icon(Icons.refresh, color: Colors.white),
+            onPressed: () {
+              controller.resetBoard();
+            },
+            tooltip: 'Reiniciar jogo',
+          ),
         ],
       ),
       backgroundColor: const Color(0xFF0D0D0D),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Center(
-            child: AspectRatio(
-              aspectRatio: 1,
-              child: Obx(() {
-                final n = controller.sizeN.value;
-                if (n <= 0) {
-                  return const Center(child: CircularProgressIndicator());
+        child: Column(
+          children: [
+            SizedBox(height: 16),
+            Obx( () {
+               final remaining = controller.hints.where((h) => h.hidden).length;
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.lightbulb, color: Colors.white),
+                      
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.yellow[800],
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: remaining > 0
+                          ? () {
+                              controller.revealHint();
+                            }
+                          : null, // desabilita se não há mais dicas
+                    ),
+                    const SizedBox(width: 8),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: CircleAvatar(
+                        radius: 10,
+                        backgroundColor:
+                            remaining > 0 ? Colors.blueAccent : Colors.grey[800],
+                        child: Text(
+                          '$remaining',
+                          style: const TextStyle(color: Colors.white, fontSize: 10),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+            }),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Center(
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Obx(() {
+                    final n = controller.sizeN.value;
+                    if (n <= 0) {
+                      return const Center(child: CircularProgressIndicator());
                 }
 
                 if(controller.isLoading.value) {
@@ -152,8 +199,10 @@ class TangoBoardPage extends StatelessWidget {
             ),
           ),
         ),
+          ],
+        ),
       ),
-    );
+  );
   }
 
   /// Retorna o widget de dica (círculo contendo "=" ou raio),
@@ -164,29 +213,26 @@ class TangoBoardPage extends StatelessWidget {
       height: 20,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: hint.isEqual ? Colors.greenAccent.withAlpha(70) : Colors.redAccent.withAlpha(70),
+        color: hint.isEqual ? Colors.greenAccent.withAlpha(40) : Colors.redAccent.withAlpha(40),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.5),
             blurRadius: 4,
-            offset: const Offset(0, 0),
+            offset: const Offset(0, 1),
           ),
         ],
       ),
       child: Center(
         child: hint.isEqual
-            ? Text(
-                '=',
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 10,
-                ),
+            ? Icon(
+                Icons.check_circle, // símbolo de "igual"
+                color: Colors.white,
+                size: 9,
               )
             : const Icon(
                 Icons.flash_on, // símbolo de "diferente"
-                color: Colors.black,
-                size: 10,
+                color: Colors.white,
+                size: 9,
               ),
       ),
     );
@@ -225,8 +271,8 @@ class TangoBoardPage extends StatelessWidget {
             Center(
               child: Image.asset(
                 'assets/images/icons/icon_moon.png',
-                width: 28,
-                height: 28,
+                width: 42,
+                height: 42,
                 color: Colors.amberAccent,
                 colorBlendMode: BlendMode.srcIn,
               ),
@@ -235,8 +281,8 @@ class TangoBoardPage extends StatelessWidget {
             Center(
               child: Image.asset(
                 'assets/images/icons/icon_triangle_dot.png',
-                width: 28,
-                height: 28,
+                width: 42,
+                height: 42,
                 color: Colors.cyanAccent,
                 colorBlendMode: BlendMode.srcIn,
               ),
