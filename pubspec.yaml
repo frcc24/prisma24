@@ -23,6 +23,7 @@ dependencies:
   cloud_firestore: ^5.6.8
   shared_preferences: 2.5.3
   package_info_plus: ^8.3.0
+  get: ^4.6.5
 
 dev_dependencies:
   flutter_test:

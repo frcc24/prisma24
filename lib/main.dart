@@ -2,11 +2,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'presentation/pages/general_pages/home_page.dart';
 import 'presentation/pages/prism_game/game_page.dart';
 import 'firebase_options.dart';
 import 'presentation/pages/general_pages/leaderboard_page.dart';
 import 'presentation/pages/general_pages/settings_page.dart';
+import 'presentation/pages/tango_game/tango_board_controller.dart';
+import 'presentation/pages/tango_game/tango_board_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +27,10 @@ class Prisma24App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+
+    Get.put(TangBoardController());
+
+    return GetMaterialApp(
       title: 'Prisma 24',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -35,9 +41,10 @@ class Prisma24App extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/':      (_) => const HomePage(),
-        '/game':  (_) => const GamePage(),
+        '/prism':  (_) => const GamePage(),
         '/rank':  (_) => const LeaderboardPage(),
         '/settings': (_) => const SettingsPage(),
+        '/tango': (_) => TangoBoardPage(),
 
       },
     );

@@ -43,13 +43,13 @@ class HomePage extends StatelessWidget {
                 color: Colors.green,
                 label: 'Iniciar jogo Prism',
                 icon: Icons.play_arrow,
-                onTap: () => Navigator.pushNamed(context, '/game'),
+                onTap: () => Navigator.pushNamed(context, '/prism'),
               ),
                _MenuButton(
                 color: Colors.lightGreen,
                 label: 'Iniciar jogo Tango',
                 icon: Icons.play_arrow,
-                onTap: () => Navigator.pushNamed(context, '/game'),
+                onTap: () => Navigator.pushNamed(context, '/tango'),
               ),
               _MenuButton(
                 color: Colors.blue,
