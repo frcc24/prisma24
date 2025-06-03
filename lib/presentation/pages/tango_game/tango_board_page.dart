@@ -1,113 +1,150 @@
 // tango_board_page.dart
 
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:math' as math;
 import 'tango_board_controller.dart';
 
 class TangoBoardPage extends StatelessWidget {
   TangoBoardPage({Key? key}) : super(key: key);
 
-  // Obtém o controller já registrado (ou registre antes de navegar para esta página)
   final TangoBoardController controller = Get.find<TangoBoardController>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tango Game Board'),
-        centerTitle: true,
-        backgroundColor: Colors.black87,
+        title: const Text('Tango Puzzle'),
+        backgroundColor: Colors.black,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.lightbulb, color: Colors.yellowAccent),
             onPressed: () {
-              // Reinicializa o tabuleiro
-              controller.initBoard(
-                controller.sizeN.value,
-                controller.initialMatrix,
-                controller.solutionMatrix,
-              );
+              controller.revealHint();
             },
+            tooltip: 'Mostrar dica',
           ),
         ],
       ),
+      backgroundColor: const Color(0xFF0D0D0D),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Center(
             child: AspectRatio(
               aspectRatio: 1,
-              // Usa Obx para ouvir as reativas dentro do controller
               child: Obx(() {
-                // 1) Ler o valor reativo sizeN
                 final n = controller.sizeN.value;
                 if (n <= 0) {
-                  // Caso ainda não tenha sido inicializado
                   return const Center(child: CircularProgressIndicator());
                 }
-                
-                if (controller.isLoading.value) {
-                  // Se estiver carregando, mostra indicador de progresso
-                  //faz nada
+
+                if(controller.isLoading.value) {
+                 
                 }
 
-                return GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: n * n,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: n,
-                    childAspectRatio: 1,
-                  ),
-                  itemBuilder: (context, index) {
-                    final row = index ~/ n;
-                    final col = index % n;
+                // Espaçamento entre tiles
+                const double spacing = 4.0;
 
-                    // 2) Lê o estado atual da célula (tirando do RxList<RxList<int>>)
-                    final cellState = controller.currentMatrix[row][col];
-                    final isPreFilled = controller.initialMatrix[row][col] != 0;
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    // Cálculo do tamanho de cada tile (largura = altura)
+                    final double totalSpacing = (n - 1) * spacing;
+                    final double tileSize =
+                        (constraints.maxWidth - totalSpacing) / n;
 
+                    return Stack(
+                      children: [
+                        // 1) Grid de tiles
+                        GridView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: n * n,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: n,
+                            childAspectRatio: 1,
+                            mainAxisSpacing: spacing,
+                            crossAxisSpacing: spacing,
+                          ),
+                          itemBuilder: (context, index) {
+                            final row = index ~/ n;
+                            final col = index % n;
 
-return GestureDetector(
-                      onTap: () => controller.cycleTile(row, col),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        transitionBuilder: (child, animation) {
-                          // Gira em torno do eixo Y (flip horizontal)
-                          final rotateAnim = Tween(begin: math.pi, end: 0.0)
-                              .animate(animation);
-                          return AnimatedBuilder(
-                            animation: rotateAnim,
-                            child: child,
-                            builder: (context, widgetChild) {
-                              // Quando o ângulo excede pi/2, inverta a face
-                              final isUnder = (rotateAnim.value > math.pi / 2);
-                              final transformValue = Matrix4.identity()
-                                ..setEntry(3, 2, 0.002) // perspectiva
-                                ..rotateY(rotateAnim.value);
-                              return Transform(
-                                transform: transformValue,
-                                alignment: Alignment.center,
-                                child: isUnder
-                                    ? const SizedBox.shrink()
-                                    : widgetChild,
-                              );
-                            },
-                          );
-                        },
-                        layoutBuilder: (widget, list) => Stack(
-                          children: [widget!, ...list],
+                            final cellState =
+                                controller.currentMatrix[row][col];
+                            final isPreFilled =
+                                controller.initialMatrix[row][col] != 0;
+
+                            return GestureDetector(
+                              onTap: () => controller.cycleTile(row, col),
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 300),
+                                transitionBuilder: (child, animation) {
+                                  final rotateAnim = Tween(begin: math.pi, end: 0.0)
+                                      .animate(animation);
+                                  return AnimatedBuilder(
+                                    animation: rotateAnim,
+                                    child: child,
+                                    builder: (context, widgetChild) {
+                                      final isUnder = rotateAnim.value > math.pi / 2;
+                                      final transform = Matrix4.identity()
+                                        ..setEntry(3, 2, 0.002)
+                                        ..rotateY(rotateAnim.value);
+                                      return Transform(
+                                        transform: transform,
+                                        alignment: Alignment.center,
+                                        child: isUnder
+                                            ? const SizedBox.shrink()
+                                            : widgetChild,
+                                      );
+                                    },
+                                  );
+                                },
+                                layoutBuilder: (widget, list) =>
+                                    Stack(children: [widget!, ...list]),
+                                switchInCurve: Curves.easeInOut,
+                                switchOutCurve: Curves.easeInOut,
+                                child: _buildTileContent(
+                                  key: ValueKey<int>(cellState * 1000 + row * n + col),
+                                  cellState: cellState,
+                                  isPreFilled: isPreFilled,
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                        // A “key” faz o AnimatedSwitcher entender quando trocar de filho
-                        child: _buildTileContent(
-                          row: row,
-                          col: col,
-                          cellState: cellState,
-                          isPreFilled: isPreFilled,
-                          key: ValueKey<int>(cellState * 100 + row * n + col),
-                        ),
-                      ),
+
+                        // 2) Overlay de dicas (hints) — cada dica revelada vira um Positioned
+                        ...controller.hints.where((h) => !h.hidden).map((h) {
+                          // Calcula posição em pixels do canto superior esquerdo do tile (row, col)
+                          final double xTile = h.col * (tileSize + spacing);
+                          final double yTile = h.row * (tileSize + spacing);
+
+                          // Se há dica horizontal: posicionar entre (row,col) e (row,col+1)
+                          if (h.isHorizontal) {
+                            // Posição central entre os dois tiles:
+                            // x_hint = xTile + tileSize + (spacing / 2)
+                            // y_hint = yTile + (tileSize / 2)
+                            final double xHint = xTile + tileSize + spacing / 2;
+                            final double yHint = yTile + tileSize / 2;
+                            return Positioned(
+                              left: xHint - 12, // 12 = raio do circle (24/2)
+                              top: yHint - 12,
+                              child: _buildHintIcon(h),
+                            );
+                          } else {
+                            // Dica vertical (entre (row,col) e (row+1,col))
+                            // x_hint = xTile + tileSize / 2
+                            // y_hint = yTile + tileSize + (spacing / 2)
+                            final double xHint = xTile + tileSize / 2;
+                            final double yHint = yTile + tileSize + spacing / 2;
+                            return Positioned(
+                              left: xHint - 12,
+                              top: yHint - 12,
+                              child: _buildHintIcon(h),
+                            );
+                          }
+                        }).toList(),
+                      ],
                     );
                   },
                 );
@@ -119,19 +156,53 @@ return GestureDetector(
     );
   }
 
- /// Constrói o conteúdo “estático” de cada tile, sem animações.
+  /// Retorna o widget de dica (círculo contendo "=" ou raio),
+  /// com tamanho fixo de 24×24 px.
+  Widget _buildHintIcon(Hint hint) {
+    return Container(
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: hint.isEqual ? Colors.greenAccent.withAlpha(70) : Colors.redAccent.withAlpha(70),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.5),
+            blurRadius: 4,
+            offset: const Offset(0, 0),
+          ),
+        ],
+      ),
+      child: Center(
+        child: hint.isEqual
+            ? Text(
+                '=',
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 10,
+                ),
+              )
+            : const Icon(
+                Icons.flash_on, // símbolo de "diferente"
+                color: Colors.black,
+                size: 10,
+              ),
+      ),
+    );
+  }
+
+  /// Constrói o conteúdo “front” de cada tile (sem animação de dica),
+  /// apenas com gradiente e ícones principais (lua/triângulo/preenchido).
   Widget _buildTileContent({
-    required int row,
-    required int col,
+    required Key key,
     required int cellState,
     required bool isPreFilled,
-    required Key key,
   }) {
     return Container(
       key: key,
-      // Fundo com gradiente minimalista e cantos levemente arredondados
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [Color(0xFF1A1A1A), Color(0xFF141414)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -149,7 +220,7 @@ return GestureDetector(
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Ícone de acordo com o estado
+          // Ícone principal de estado do tile
           if (cellState == 1)
             Center(
               child: Image.asset(
@@ -171,7 +242,7 @@ return GestureDetector(
               ),
             ),
 
-          // Se for pré-preenchido, sombra extra
+          // Overlay para células pré-preenchidas
           if (isPreFilled)
             Container(
               decoration: BoxDecoration(
@@ -183,8 +254,4 @@ return GestureDetector(
       ),
     );
   }
-
-
-  
 }
-

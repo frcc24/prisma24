@@ -1,5 +1,7 @@
 // tango_board_controller.dart
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -18,6 +20,13 @@ class TangoBoardController extends GetxController {
   /// Matriz atual que o usuário vai preenchendo
   /// Cada elemento de currentMatrix é uma List<int> simples, mas o "container" é reativo (RxList).
   final RxList<List<int>> currentMatrix = <List<int>>[].obs;
+
+  /// Lista de dicas (hints). Cada Hint tem um row,col, direção (horizontal/vertical),
+  /// se a dica é “iguais” ou “diferentes” e se já foi revelada (hidden=false).
+  final RxList<Hint> hints = <Hint>[].obs;
+
+  final Random _random = Random();
+
 
   @override
   void onInit() {
@@ -62,33 +71,33 @@ class TangoBoardController extends GetxController {
     
   //   );
 
-      initBoard(9, 
-      // Puzzle 4
-  [
-    [1, 0, 1, 1, 0, 0, 0, 0, 0],
-    [2, 0, 0, 2, 0, 2, 0, 0, 0],
-    [1, 0, 0, 0, 2, 1, 0, 0, 0],
-    [1, 0, 1, 0, 1, 2, 0, 0, 0],
-    [2, 0, 2, 1, 0, 1, 0, 0, 0],
-    [2, 0, 0, 0, 0, 0, 1, 1, 1],
-    [0, 0, 0, 0, 0, 0, 2, 2, 2],
-    [0, 0, 0, 0, 0, 0, 1, 1, 1],
-    [0, 0, 0, 0, 0, 0, 2, 2, 2],
-  ],
-    // Puzzle 4
-  [
-    [1, 1, 1, 1, 0, 0, 0, 0, 0],
-    [2, 2, 0, 2, 0, 2, 0, 0, 0],
-    [1, 2, 0, 0, 2, 1, 0, 0, 0],
-    [1, 1, 1, 0, 1, 2, 0, 0, 0],
-    [2, 1, 2, 1, 0, 1, 0, 0, 0],
-    [2, 1, 0, 0, 0, 0, 1, 1, 1],
-    [0, 1, 0, 3, 0, 0, 2, 2, 2],
-    [0, 1, 0, 2, 0, 0, 1, 1, 1],
-    [0, 1, 1, 1, 0, 0, 2, 2, 2],
-  ], 
+  //     initBoard(9, 
+  //     // Puzzle 4
+  // [
+  //   [1, 0, 1, 1, 0, 0, 0, 0, 0],
+  //   [2, 0, 0, 2, 0, 2, 0, 0, 0],
+  //   [1, 0, 0, 0, 2, 1, 0, 0, 0],
+  //   [1, 0, 1, 0, 1, 2, 0, 0, 0],
+  //   [2, 0, 2, 1, 0, 1, 0, 0, 0],
+  //   [2, 0, 0, 0, 0, 0, 1, 1, 1],
+  //   [0, 0, 0, 0, 0, 0, 2, 2, 2],
+  //   [0, 0, 0, 0, 0, 0, 1, 1, 1],
+  //   [0, 0, 0, 0, 0, 0, 2, 2, 2],
+  // ],
+  //   // Puzzle 4
+  // [
+  //   [1, 1, 1, 1, 1, 1, 1, 1, 1],
+  //   [2, 2, 2, 2, 2, 2, 2, 2, 2],
+  //   [1, 2, 2, 2, 2, 1, 1, 1, 2],
+  //   [1, 1, 1, 0, 1, 2, 0, 0, 0],
+  //   [2, 1, 2, 1, 0, 1, 0, 0, 0],
+  //   [2, 1, 0, 0, 0, 0, 1, 1, 1],
+  //   [0, 1, 0, 3, 0, 0, 2, 2, 2],
+  //   [0, 1, 0, 2, 0, 0, 1, 1, 1],
+  //   [0, 1, 1, 1, 0, 0, 2, 2, 2],
+  // ], 
     
-    );
+  //   );
 
   }
 
@@ -110,8 +119,87 @@ class TangoBoardController extends GetxController {
       currentMatrix.add(List<int>.from(row));
     }
     // Agora currentMatrix é um RxList<List<int>> contendo linhas mutáveis.
+    // Gera as dicas a partir da solução
+    _generateHints();
 
+    // As dicas começam todas ocultas (hidden=true)
+    hints.refresh();
     // Não precisa chamar update(), pois usamos Obx() para ouvir currentMatrix e sizeN automaticamente.
+  }
+
+
+  /// Gera uma lista de Hint aleatórias (com base na solução). 
+  /// Cada Hint compara dois tiles vizinhos (horizontal ou vertical).
+  /// Se os valores na solutionMatrix forem iguais => isEqual = true; 
+  /// caso contrário, isEqual = false.
+  /// Apenas escolhe algumas dicas (porcentagem ou quantidade fixa).
+  void _generateHints() {
+    hints.clear();
+
+    final int n = sizeN.value;
+    // Para cada posição possível, podemos comparar com o tile à direita (se existir)
+    // e com o tile abaixo (se existir). Mas pegaremos apenas um subconjunto aleatório.
+    // Construímos primeiro todas as possíveis dicas:
+    List<Hint> todasPossiveis = [];
+
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        // Se houver tile à direita
+        if (j + 1 < n) {
+          bool eq = (solutionMatrix[i][j] == solutionMatrix[i][j + 1]);
+          todasPossiveis.add(Hint(
+            row: i,
+            col: j,
+            isHorizontal: true,
+            isEqual: eq,
+            hidden: true,
+          ));
+        }
+        // Se houver tile abaixo
+        if (i + 1 < n) {
+          bool eq = (solutionMatrix[i][j] == solutionMatrix[i + 1][j]);
+          todasPossiveis.add(Hint(
+            row: i,
+            col: j,
+            isHorizontal: false,
+            isEqual: eq,
+            hidden: true,
+          ));
+        }
+      }
+    }
+
+    // Agora selecionamos um número X de dicas para exibir (de forma aleatória).
+    // Por exemplo, 20% das dicas possíveis:
+    int quantidadeParaRevelar = (todasPossiveis.length * 1).round();
+    quantidadeParaRevelar = max(quantidadeParaRevelar, 1); // no mínimo 1 dica
+
+    // Embaralha a lista
+    todasPossiveis.shuffle(_random);
+
+    // Pega os N primeiros
+    for (int k = 0; k < quantidadeParaRevelar; k++) {
+      hints.add(todasPossiveis[k]);
+    }
+
+    // As dicas na lista estão com hidden=true; serão reveladas conforme o jogador
+  }
+
+/// Revela a próxima dica oculta (outra, aleatória entre as que ainda não foram mostradas).
+  /// Se não houver mais dicas para revelar, não faz nada.
+  void revealHint() {
+    isLoading.value = true;
+    // Filtra apenas as dicas que ainda estão ocultas
+    final ocultas = hints.where((h) => h.hidden).toList();
+    if (ocultas.isEmpty) return;
+
+    // Escolhe uma aleatoriamente
+    final idx = _random.nextInt(ocultas.length);
+    ocultas[idx].hidden = false;
+
+    // Como modificamos um Hint dentro de hints, precisamos chamar refresh() para atualizar a UI
+    hints.refresh();
+    isLoading.value = false;
   }
 
   /// Verifica se a state atual bate com a matrix solução
@@ -160,4 +248,28 @@ class TangoBoardController extends GetxController {
       );
     }
   }
+}
+
+
+
+/// Classe que representa uma dica (hint) sobre dois tiles vizinhos.
+/// row, col = posição (linha/coluna) do tile onde será exibido o ícone da dica.
+/// Se isHorizontal = true, significa que a dica compara o tile (row,col) com (row, col+1).
+/// Caso contrário, compara com o tile (row+1, col).
+/// isEqual = true se a dica for “=” (iguais), false se for “≠” (diferentes).
+/// hidden = true enquanto não for revelada; quando o jogador pedir dica, hidden = false.
+class Hint {
+  final int row;
+  final int col;
+  final bool isHorizontal;
+  final bool isEqual;
+  bool hidden;
+
+  Hint({
+    required this.row,
+    required this.col,
+    required this.isHorizontal,
+    required this.isEqual,
+    this.hidden = true,
+  });
 }
