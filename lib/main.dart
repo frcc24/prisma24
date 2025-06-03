@@ -2,11 +2,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'presentation/pages/home_page.dart';
-import 'presentation/pages/game_page.dart';
+import 'presentation/pages/general_pages/home_page.dart';
+import 'presentation/pages/prism_game/game_page.dart';
 import 'firebase_options.dart';
-import 'presentation/pages/leaderboard_page.dart';
-import 'presentation/pages/settings_page.dart';
+import 'presentation/pages/general_pages/leaderboard_page.dart';
+import 'presentation/pages/general_pages/settings_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

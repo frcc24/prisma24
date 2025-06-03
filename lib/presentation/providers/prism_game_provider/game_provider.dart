@@ -2,8 +2,8 @@
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/models/game_state.dart';
-import '../../domain/models/piece.dart';
+import '../../../domain/models/prism_game_models/game_state.dart';
+import '../../../domain/models/prism_game_models/piece.dart';
 
 /// Provider global do jogo
 final gameProvider =

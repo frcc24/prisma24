@@ -1,5 +1,5 @@
 import 'dart:math';
-import '../../presentation/widgets/hex_board.dart';
+import '../../../presentation/widgets/prism_game_widgets/hex_board.dart';
 
 /// Seis direções principais para grade hexagonal (orientação pointy‑top)
 /// usando coordenadas axiais (q, r).

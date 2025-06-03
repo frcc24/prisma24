@@ -8,10 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../core/sfx.dart';
-import '../../domain/models/game_state.dart';
-import '../providers/game_provider.dart';
-import '../widgets/hex_board.dart';
+import '../../../core/sfx.dart';
+import '../../../domain/models/prism_game_models/game_state.dart';
+import '../../providers/prism_game_provider/game_provider.dart';
+import '../../widgets/prism_game_widgets/hex_board.dart';
 
 /* ───────────────────────── TIMER PROVIDER ───────────────────────── */
 /*  Emite segundos decorrido desde que a tela foi aberta. Ao sair, o  */

@@ -2,7 +2,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '../../domain/models/piece.dart';
+import '../../../domain/models/prism_game_models/piece.dart';
 
 /// Cores do jogo
 const List<Color> kBoardPalette = [

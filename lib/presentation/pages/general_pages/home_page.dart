@@ -41,7 +41,13 @@ class HomePage extends StatelessWidget {
               // botões ocupam 80 % da largura; máx 380 px
               _MenuButton(
                 color: Colors.green,
-                label: 'Iniciar jogo',
+                label: 'Iniciar jogo Prism',
+                icon: Icons.play_arrow,
+                onTap: () => Navigator.pushNamed(context, '/game'),
+              ),
+               _MenuButton(
+                color: Colors.lightGreen,
+                label: 'Iniciar jogo Tango',
                 icon: Icons.play_arrow,
                 onTap: () => Navigator.pushNamed(context, '/game'),
               ),
