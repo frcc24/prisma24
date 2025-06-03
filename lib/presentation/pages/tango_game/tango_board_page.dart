@@ -19,13 +19,6 @@ class TangoBoardPage extends StatelessWidget {
         backgroundColor: Colors.black,
         actions: [
           IconButton(
-            icon: const Icon(Icons.lightbulb, color: Colors.yellowAccent),
-            onPressed: () {
-              controller.revealHint();
-            },
-            tooltip: 'Mostrar dica',
-          ),
-          IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: () {
               controller.resetBoard();
