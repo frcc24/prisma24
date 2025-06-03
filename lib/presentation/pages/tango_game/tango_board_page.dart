@@ -1,5 +1,7 @@
 // tango_board_page.dart
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'tango_board_controller.dart';
@@ -13,6 +15,24 @@ class TangoBoardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Tango Game Board'),
+        centerTitle: true,
+        backgroundColor: Colors.black87,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              // Reinicializa o tabuleiro
+              controller.initBoard(
+                controller.sizeN.value,
+                controller.initialMatrix,
+                controller.solutionMatrix,
+              );
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -30,7 +50,7 @@ class TangoBoardPage extends StatelessWidget {
                 
                 if (controller.isLoading.value) {
                   // Se estiver carregando, mostra indicador de progresso
-                  return const Center(child: CircularProgressIndicator());
+                  //faz nada
                 }
 
                 return GridView.builder(
@@ -48,48 +68,45 @@ class TangoBoardPage extends StatelessWidget {
                     final cellState = controller.currentMatrix[row][col];
                     final isPreFilled = controller.initialMatrix[row][col] != 0;
 
-                    return GestureDetector(
+
+return GestureDetector(
                       onTap: () => controller.cycleTile(row, col),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          // Imagem base do tile (sempre desenhada)
-                          Image.asset(
-                            'assets/images/tiles/tile_square_base.png',
-                            fit: BoxFit.cover, 
-                            color: Colors.white.withOpacity(0.1),
-                            colorBlendMode: BlendMode.modulate,                         
-                          ),
-
-                          // Se estiver marcado com “1” (lua), mostra ícone da lua
-                          if (cellState == 1)
-                            Center(
-                              child: Image.asset(
-                                'assets/images/icons/icon_moon.png',
-                                width: 24,
-                                height: 24,
-                                color: Colors.red,
-                                colorBlendMode: BlendMode.srcIn,
-                              ),
-                            )
-                          // Se estiver marcado com “2” (triângulo), mostra triângulo
-                          else if (cellState == 2)
-                            Center(
-                              child: Image.asset(
-                                'assets/images/icons/icon_triangle_dot.png',
-                                width: 24,
-                                height: 24,
-                                color: Colors.blue,
-                                colorBlendMode: BlendMode.srcIn,
-                              ),
-                            ),
-
-                          // Se for pré-preenchido (initialMatrix != 0), aplica um overlay semitransparente
-                          if (isPreFilled)
-                            Container(
-                              color: Colors.black.withOpacity(0.2),
-                            ),
-                        ],
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        transitionBuilder: (child, animation) {
+                          // Gira em torno do eixo Y (flip horizontal)
+                          final rotateAnim = Tween(begin: math.pi, end: 0.0)
+                              .animate(animation);
+                          return AnimatedBuilder(
+                            animation: rotateAnim,
+                            child: child,
+                            builder: (context, widgetChild) {
+                              // Quando o ângulo excede pi/2, inverta a face
+                              final isUnder = (rotateAnim.value > math.pi / 2);
+                              final transformValue = Matrix4.identity()
+                                ..setEntry(3, 2, 0.002) // perspectiva
+                                ..rotateY(rotateAnim.value);
+                              return Transform(
+                                transform: transformValue,
+                                alignment: Alignment.center,
+                                child: isUnder
+                                    ? const SizedBox.shrink()
+                                    : widgetChild,
+                              );
+                            },
+                          );
+                        },
+                        layoutBuilder: (widget, list) => Stack(
+                          children: [widget!, ...list],
+                        ),
+                        // A “key” faz o AnimatedSwitcher entender quando trocar de filho
+                        child: _buildTileContent(
+                          row: row,
+                          col: col,
+                          cellState: cellState,
+                          isPreFilled: isPreFilled,
+                          key: ValueKey<int>(cellState * 100 + row * n + col),
+                        ),
                       ),
                     );
                   },
@@ -101,4 +118,73 @@ class TangoBoardPage extends StatelessWidget {
       ),
     );
   }
+
+ /// Constrói o conteúdo “estático” de cada tile, sem animações.
+  Widget _buildTileContent({
+    required int row,
+    required int col,
+    required int cellState,
+    required bool isPreFilled,
+    required Key key,
+  }) {
+    return Container(
+      key: key,
+      // Fundo com gradiente minimalista e cantos levemente arredondados
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF1A1A1A), Color(0xFF141414)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            offset: const Offset(0, 3),
+            blurRadius: 6,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Ícone de acordo com o estado
+          if (cellState == 1)
+            Center(
+              child: Image.asset(
+                'assets/images/icons/icon_moon.png',
+                width: 28,
+                height: 28,
+                color: Colors.amberAccent,
+                colorBlendMode: BlendMode.srcIn,
+              ),
+            )
+          else if (cellState == 2)
+            Center(
+              child: Image.asset(
+                'assets/images/icons/icon_triangle_dot.png',
+                width: 28,
+                height: 28,
+                color: Colors.cyanAccent,
+                colorBlendMode: BlendMode.srcIn,
+              ),
+            ),
+
+          // Se for pré-preenchido, sombra extra
+          if (isPreFilled)
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: Colors.black.withOpacity(0.25),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+
+  
 }
+
