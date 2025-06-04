@@ -1,9 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:file_picker/file_picker.dart';
 
 class ImportMapPage extends StatefulWidget {
   const ImportMapPage({super.key});
@@ -14,17 +11,12 @@ class ImportMapPage extends StatefulWidget {
 
 class _ImportMapPageState extends State<ImportMapPage> {
   String? _status;
+  final _controller = TextEditingController();
 
-  Future<void> _pickAndUpload() async {
+  Future<void> _uploadFromText() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['json'],
-      );
-      if (result == null || result.files.isEmpty) return;
-      final path = result.files.single.path;
-      if (path == null) return;
-      final text = await File(path).readAsString();
+      final text = _controller.text.trim();
+      if (text.isEmpty) return;
       final data = json.decode(text);
       await FirebaseFirestore.instance.collection('full_mode_maps').add(data);
       setState(() => _status = 'Mapa enviado com sucesso!');
@@ -38,22 +30,34 @@ class _ImportMapPageState extends State<ImportMapPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Importar mapa')),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: _pickAndUpload,
-              child: const Text('Selecionar JSON'),
-            ),
-            if (_status != null)
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  _status!,
-                  textAlign: TextAlign.center,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextField(
+                controller: _controller,
+                maxLines: 10,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Cole o JSON aqui',
                 ),
               ),
-          ],
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: _uploadFromText,
+                child: const Text('Enviar para Firestore'),
+              ),
+              if (_status != null)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    _status!,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
