@@ -59,7 +59,7 @@ class _SettingsPageState extends State<SettingsPage> {
         title: const Text('Alterar nome'),
         content: TextField(
           controller: controller,
-          maxLength: 12,
+          maxLength: 24,
           decoration: const InputDecoration(hintText: 'Seu nome no ranking'),
         ),
         actions: [
