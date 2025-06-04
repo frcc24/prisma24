@@ -18,7 +18,13 @@ class _AddPhasePageState extends State<AddPhasePage> {
     try {
       final text = _controller.text.trim();
       if (text.isEmpty) return;
-      final data = json.decode(text);
+      final decoded = json.decode(text);
+      if (decoded is! Map<String, dynamic>) {
+        setState(() => _status = 'JSON inválido: deve ser um objeto');
+        return;
+      }
+      final data = Map<String, dynamic>.from(decoded);
+
       // Determine the target collection based on existing ones
       const base = 'maps';
       int index = 1;
@@ -32,6 +38,7 @@ class _AddPhasePageState extends State<AddPhasePage> {
         }
         index++;
       }
+
       await collection.add(data);
       setState(() => _status = 'Fase adicionada com sucesso!');
     } catch (e) {
@@ -77,3 +84,26 @@ class _AddPhasePageState extends State<AddPhasePage> {
     );
   }
 }
+
+
+/*{
+  "game": "tango",
+  "difficulty": "iniciante",
+  "board": {
+    "size": 4,
+    "initial": [
+      [1, 0, 0, 0],
+      [0, 2, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 2]
+    ],
+    "solution": [
+      [1, 2, 1, 2],
+      [2, 2, 1, 1],
+      [1, 1, 2, 2],
+      [2, 1, 2, 1]
+    ],
+    "colors": ["moon", "triangle"]
+  }
+}
+*/
