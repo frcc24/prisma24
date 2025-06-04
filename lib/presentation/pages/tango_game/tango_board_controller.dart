@@ -150,25 +150,33 @@ class TangoBoardController extends GetxController {
       for (int j = 0; j < n; j++) {
         // Se houver tile à direita
         if (j + 1 < n) {
-          bool eq = (solutionMatrix[i][j] == solutionMatrix[i][j + 1]);
-          todasPossiveis.add(Hint(
-            row: i,
-            col: j,
-            isHorizontal: true,
-            isEqual: eq,
-            hidden: true,
-          ));
+          // Apenas adiciona a dica se pelo menos um dos dois tiles
+          // não veio pré-preenchido na matriz inicial
+          if (initialMatrix[i][j] == 0 || initialMatrix[i][j + 1] == 0) {
+            bool eq = (solutionMatrix[i][j] == solutionMatrix[i][j + 1]);
+            todasPossiveis.add(Hint(
+              row: i,
+              col: j,
+              isHorizontal: true,
+              isEqual: eq,
+              hidden: true,
+            ));
+          }
         }
         // Se houver tile abaixo
         if (i + 1 < n) {
-          bool eq = (solutionMatrix[i][j] == solutionMatrix[i + 1][j]);
-          todasPossiveis.add(Hint(
-            row: i,
-            col: j,
-            isHorizontal: false,
-            isEqual: eq,
-            hidden: true,
-          ));
+          // Apenas adiciona a dica se ao menos um dos dois tiles
+          // não veio pré-preenchido na matriz inicial
+          if (initialMatrix[i][j] == 0 || initialMatrix[i + 1][j] == 0) {
+            bool eq = (solutionMatrix[i][j] == solutionMatrix[i + 1][j]);
+            todasPossiveis.add(Hint(
+              row: i,
+              col: j,
+              isHorizontal: false,
+              isEqual: eq,
+              hidden: true,
+            ));
+          }
         }
       }
     }
