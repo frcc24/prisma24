@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../tango_game/tango_board_controller.dart';
 
 class FullModePage extends StatelessWidget {
   const FullModePage({super.key});
@@ -57,7 +59,7 @@ class FullModePage extends StatelessWidget {
                         shape: const CircleBorder(),
                         padding: const EdgeInsets.all(20),
                       ),
-                      onPressed: () {},
+                        onPressed: () async { await Get.find<TangoBoardController>().loadPhase('mapa1', i); Navigator.pushNamed(context, '/tango'); },
                       child: Text('${i + 1}'),
                     ),
                   ),
