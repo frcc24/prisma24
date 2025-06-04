@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart' show FirebaseException;
 
 class AddPhasePage extends StatefulWidget {
   const AddPhasePage({super.key});
@@ -25,22 +26,45 @@ class _AddPhasePageState extends State<AddPhasePage> {
       }
       final data = Map<String, dynamic>.from(decoded);
 
-      // Determine the target collection based on existing ones
+      // ─────────────────── Escolher ou criar o mapa ───────────────────
       const base = 'maps';
       int index = 1;
       CollectionReference<Map<String, dynamic>> collection;
+      QuerySnapshot<Map<String, dynamic>> snapshot;
+
       while (true) {
         final name = index == 1 ? base : '$base$index';
         collection = FirebaseFirestore.instance.collection(name);
-        final count = await collection.get().then((s) => s.size);
-        if (count < 10) {
+
+        // 1. verificar se o mapax ja existe e tem menos de 10 fases
+        snapshot = await collection.get();
+        if (snapshot.size == 0) {
+          // 2. se nao existir cria o mapax
+          try {
+            await collection.add({'createdAt': FieldValue.serverTimestamp()});
+          } on FirebaseException catch (e) {
+            setState(() => _status = 'Erro do Firestore: ${e.message}');
+            return;
+          } catch (e) {
+            setState(() => _status = 'Erro ao criar mapa: $e');
+            return;
+          }
+          break;
+        } else if (snapshot.size < 10) {
           break;
         }
         index++;
       }
 
-      await collection.add(data);
-      setState(() => _status = 'Fase adicionada com sucesso!');
+      // 3 e 4. adicionar a fase apos garantir a existencia do mapa
+      try {
+        await collection.add(data);
+        setState(() => _status = 'Fase adicionada com sucesso!');
+      } on FirebaseException catch (e) {
+        setState(() => _status = 'Erro do Firestore: ${e.message}');
+      } catch (e) {
+        setState(() => _status = 'Erro ao enviar mapa: $e');
+      }
     } catch (e) {
       setState(() => _status = 'Erro ao enviar mapa: $e');
     }
