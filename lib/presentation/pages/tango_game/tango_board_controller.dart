@@ -182,19 +182,31 @@ class TangoBoardController extends GetxController {
     }
 
     // Agora selecionamos um número X de dicas para exibir (de forma aleatória).
-    // Por exemplo, 20% das dicas possíveis:
+    // Atualmente utilizamos 100% das dicas possíveis, mas revelaremos
+    // apenas uma parte ao iniciar o tabuleiro.
     int quantidadeParaRevelar = (todasPossiveis.length * 1).round();
     quantidadeParaRevelar = max(quantidadeParaRevelar, 1); // no mínimo 1 dica
 
-    // Embaralha a lista
+    // Embaralha a lista para sortear as dicas a mostrar e também as que
+    // já começarão visíveis.
     todasPossiveis.shuffle(_random);
 
-    // Pega os N primeiros
-    for (int k = 0; k < quantidadeParaRevelar; k++) {
-      hints.add(todasPossiveis[k]);
+    // Define quantas dicas serão visíveis inicialmente (20% do total gerado).
+    int jaVisiveis = (quantidadeParaRevelar * 0.2).round();
+    if (jaVisiveis == 0 && quantidadeParaRevelar > 0) {
+      jaVisiveis = 1;
     }
 
-    // As dicas na lista estão com hidden=true; serão reveladas conforme o jogador
+    // Pega os N primeiros e marca os primeiros "jaVisiveis" como não ocultos.
+    for (int k = 0; k < quantidadeParaRevelar; k++) {
+      final hint = todasPossiveis[k];
+      if (k < jaVisiveis) {
+        hint.hidden = false;
+      }
+      hints.add(hint);
+    }
+
+    // As demais dicas permanecem ocultas até o jogador solicitá-las
   }
 
 /// Revela a próxima dica oculta (outra, aleatória entre as que ainda não foram mostradas).
@@ -261,22 +273,22 @@ class TangoBoardController extends GetxController {
     }
   }
   /// No TangoBoardController:
-void resetBoard() {
-  isLoading.value = true;
-  // 1) Redefine currentMatrix como cópia profunda de initialMatrix
-  currentMatrix.clear();
-  for (var row in initialMatrix) {
-    currentMatrix.add(List<int>.from(row));
-  }
-  currentMatrix.refresh();
+  void resetBoard() {
+    isLoading.value = true;
 
-  // 2) Oculta todas as dicas existentes (sem gerar novas)
-  for (var h in hints) {
-    h.hidden = true;
+    // 1) Redefine currentMatrix como cópia profunda de initialMatrix
+    currentMatrix.clear();
+    for (var row in initialMatrix) {
+      currentMatrix.add(List<int>.from(row));
+    }
+    currentMatrix.refresh();
+
+    // 2) Gera novamente as dicas para que 20% já fiquem visíveis
+    _generateHints();
+    hints.refresh();
+
+    isLoading.value = false;
   }
-  hints.refresh();
-  isLoading.value = false;
-}
 
 
 }

@@ -6,17 +6,34 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'tango_board_controller.dart';
 
-class TangoBoardPage extends StatelessWidget {
+class TangoBoardPage extends StatefulWidget {
   TangoBoardPage({Key? key}) : super(key: key);
 
+  @override
+  State<TangoBoardPage> createState() => _TangoBoardPageState();
+}
+
+class _TangoBoardPageState extends State<TangoBoardPage> {
   final TangoBoardController controller = Get.find<TangoBoardController>();
 
   @override
+  void initState() {
+    super.initState();
+    // Sempre inicia com um tabuleiro novo
+    controller.resetBoard();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tango Puzzle'),
-        backgroundColor: Colors.black,
+    return WillPopScope(
+      onWillPop: () async {
+        controller.resetBoard();
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Tango Puzzle'),
+          backgroundColor: Colors.black,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
