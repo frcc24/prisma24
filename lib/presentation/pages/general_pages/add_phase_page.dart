@@ -2,15 +2,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ImportMapPage extends StatefulWidget {
-  const ImportMapPage({super.key});
+class AddPhasePage extends StatefulWidget {
+  const AddPhasePage({super.key});
 
   @override
-  State<ImportMapPage> createState() => _ImportMapPageState();
+  State<AddPhasePage> createState() => _AddPhasePageState();
 }
 
 
-class _ImportMapPageState extends State<ImportMapPage> {
+class _AddPhasePageState extends State<AddPhasePage> {
   String? _status;
   final _controller = TextEditingController();
 
@@ -19,8 +19,21 @@ class _ImportMapPageState extends State<ImportMapPage> {
       final text = _controller.text.trim();
       if (text.isEmpty) return;
       final data = json.decode(text);
-      await FirebaseFirestore.instance.collection('full_mode_maps').add(data);
-      setState(() => _status = 'Mapa enviado com sucesso!');
+      // Determine the target collection based on existing ones
+      const base = 'maps';
+      int index = 1;
+      CollectionReference<Map<String, dynamic>> collection;
+      while (true) {
+        final name = index == 1 ? base : '$base$index';
+        collection = FirebaseFirestore.instance.collection(name);
+        final count = await collection.get().then((s) => s.size);
+        if (count < 10) {
+          break;
+        }
+        index++;
+      }
+      await collection.add(data);
+      setState(() => _status = 'Fase adicionada com sucesso!');
     } catch (e) {
       setState(() => _status = 'Erro ao enviar mapa: $e');
     }
@@ -29,7 +42,7 @@ class _ImportMapPageState extends State<ImportMapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Importar mapa')),
+      appBar: AppBar(title: const Text('Adicionar fase')),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),

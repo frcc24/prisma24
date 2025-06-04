@@ -71,9 +71,9 @@ class HomePage extends StatelessWidget {
               ),
               _MenuButton(
                 color: Colors.cyan,
-                label: 'Importar mapas',
+                label: 'Adicionar fase',
                 icon: Icons.upload_file,
-                onTap: () => Navigator.pushNamed(context, '/import_map'),
+                onTap: () => Navigator.pushNamed(context, '/add_phase'),
               ),
                 _MenuButton(
                 color: Colors.red,
