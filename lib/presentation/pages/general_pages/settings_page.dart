@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -42,6 +43,14 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() => _soundOn = value);
   }
 
+  Future<void> _registerUser(String name) async {
+    final users = FirebaseFirestore.instance.collection('users');
+    final query = await users.where('name', isEqualTo: name).limit(1).get();
+    if (query.docs.isEmpty) {
+      await users.add({'name': name, 'ts': FieldValue.serverTimestamp()});
+    }
+  }
+
   Future<void> _editName() async {
     final controller = TextEditingController(text: _playerName);
     final result = await showDialog<String>(
@@ -65,6 +74,7 @@ class _SettingsPageState extends State<SettingsPage> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_kNameKey, result);
       setState(() => _playerName = result);
+      await _registerUser(result);
     }
   }
 
