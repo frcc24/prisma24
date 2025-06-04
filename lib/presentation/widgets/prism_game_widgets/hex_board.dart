@@ -187,7 +187,7 @@ class _HexPainter extends CustomPainter {
         canvas.drawPath(path, stroke);
 
         // contorno do território anterior
-        if (oldTerritory.contains(Point(r, c))) {
+        if (oldTerritory.contains(Point(c, r))) {
           canvas.drawPath(path, borderOld);
         }
 
