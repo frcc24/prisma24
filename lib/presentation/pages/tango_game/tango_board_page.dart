@@ -6,10 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'tango_board_controller.dart';
 
-class TangoBoardPage extends StatelessWidget {
-  TangoBoardPage({super.key});
-
-  final TangoBoardController controller = Get.find<TangoBoardController>();
+class TangoBoardPage extends GetView<TangoBoardController> {
+  const TangoBoardPage({super.key});
 
   @override
   Widget build(BuildContext context) {

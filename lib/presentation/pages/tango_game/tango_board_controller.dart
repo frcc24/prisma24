@@ -102,6 +102,7 @@ class TangoBoardController extends GetxController {
   // ], 
     
   //   );
+    resetBoard();
 
   }
 
@@ -274,20 +275,20 @@ class TangoBoardController extends GetxController {
   }
   /// No TangoBoardController:
 void resetBoard() {
-  isLoading.value = true;
-  // 1) Redefine currentMatrix como cópia profunda de initialMatrix
-  currentMatrix.clear();
-  for (var row in initialMatrix) {
-    currentMatrix.add(List<int>.from(row));
-  }
-  currentMatrix.refresh();
+    isLoading.value = true;
 
-  // 2) Oculta todas as dicas existentes (sem gerar novas)
-  for (var h in hints) {
-    h.hidden = true;
-  }
-  hints.refresh();
-  isLoading.value = false;
+    // 1) Redefine currentMatrix como cópia profunda de initialMatrix
+    currentMatrix.clear();
+    for (var row in initialMatrix) {
+      currentMatrix.add(List<int>.from(row));
+    }
+    currentMatrix.refresh();
+
+    // 2) Gera novamente as dicas para que 20% já fiquem visíveis
+    _generateHints();
+    hints.refresh();
+
+    isLoading.value = false;
 }
 
 
