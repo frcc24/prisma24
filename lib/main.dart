@@ -12,6 +12,9 @@ import 'presentation/pages/general_pages/full_mode_page.dart';
 import 'presentation/pages/general_pages/add_phase_page.dart';
 import 'presentation/pages/tango_game/tango_board_controller.dart' show TangoBoardController;
 import 'presentation/pages/tango_game/tango_board_page.dart';
+import 'presentation/pages/nonogram_game/nonogram_board_controller.dart'
+    show NonogramBoardController;
+import 'presentation/pages/nonogram_game/nonogram_board_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +34,7 @@ class Prisma24App extends StatelessWidget {
   Widget build(BuildContext context) {
 
     Get.put(TangoBoardController());
+    Get.put(NonogramBoardController());
 
     return GetMaterialApp(
       title: 'Prisma 24',
@@ -48,6 +52,7 @@ class Prisma24App extends StatelessWidget {
         '/rank':  (_) => const LeaderboardPage(),
         '/settings': (_) => const SettingsPage(),
         '/tango': (_) => TangoBoardPage(),
+        '/nonogram': (_) => NonogramBoard(),
         '/add_phase': (_) => const AddPhasePage(),
 
       },
