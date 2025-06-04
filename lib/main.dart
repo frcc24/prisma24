@@ -9,6 +9,7 @@ import 'firebase_options.dart';
 import 'presentation/pages/general_pages/leaderboard_page.dart';
 import 'presentation/pages/general_pages/settings_page.dart';
 import 'presentation/pages/general_pages/full_mode_page.dart';
+import 'presentation/pages/general_pages/import_map_page.dart';
 import 'presentation/pages/tango_game/tango_board_controller.dart' show TangoBoardController;
 import 'presentation/pages/tango_game/tango_board_page.dart';
 
@@ -47,6 +48,7 @@ class Prisma24App extends StatelessWidget {
         '/rank':  (_) => const LeaderboardPage(),
         '/settings': (_) => const SettingsPage(),
         '/tango': (_) => TangoBoardPage(),
+        '/import_map': (_) => const ImportMapPage(),
 
       },
     );
