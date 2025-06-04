@@ -27,21 +27,20 @@ class _AddPhasePageState extends State<AddPhasePage> {
       final data = Map<String, dynamic>.from(decoded);
 
       // ─────────────────── Escolher ou criar o mapa ───────────────────
-      const base = 'maps';
+      final maps = FirebaseFirestore.instance.collection('maps');
       int index = 1;
-      CollectionReference<Map<String, dynamic>> collection;
-      QuerySnapshot<Map<String, dynamic>> snapshot;
+      late DocumentReference<Map<String, dynamic>> mapDoc;
+      late CollectionReference<Map<String, dynamic>> phases;
 
       while (true) {
-        final name = index == 1 ? base : '$base$index';
-        collection = FirebaseFirestore.instance.collection(name);
+        mapDoc = maps.doc('mapa$index');
+        final docSnapshot = await mapDoc.get();
 
         // 1. verificar se o mapax ja existe e tem menos de 10 fases
-        snapshot = await collection.get();
-        if (snapshot.size == 0) {
+        if (!docSnapshot.exists) {
           // 2. se nao existir cria o mapax
           try {
-            await collection.add({'createdAt': FieldValue.serverTimestamp()});
+            await mapDoc.set({'createdAt': FieldValue.serverTimestamp()});
           } on FirebaseException catch (e) {
             setState(() => _status = 'Erro do Firestore: ${e.message}');
             return;
@@ -49,17 +48,21 @@ class _AddPhasePageState extends State<AddPhasePage> {
             setState(() => _status = 'Erro ao criar mapa: $e');
             return;
           }
+          phases = mapDoc.collection('phases');
           break;
-        } else if (snapshot.size < 10) {
-          break;
+        } else {
+          phases = mapDoc.collection('phases');
+          final phaseSnap = await phases.get();
+          if (phaseSnap.size < 10) {
+            break;
+          }
         }
         index++;
       }
 
       // 3 e 4. adicionar a fase apos garantir a existencia do mapa
       try {
-        await collection.add(data);
-        setState(() => _status = 'Fase adicionada com sucesso!');
+      setState(() => _status = 'Fase adicionada com sucesso!');
       } on FirebaseException catch (e) {
         setState(() => _status = 'Erro do Firestore: ${e.message}');
       } catch (e) {
