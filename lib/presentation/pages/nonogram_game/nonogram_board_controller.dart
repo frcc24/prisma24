@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 /// Controller for the Nonogram puzzle board.
@@ -21,6 +22,7 @@ import 'package:get/get.dart';
 /// ```
 class NonogramBoardController extends GetxController {
   final RxInt size = 0.obs;
+  RxBool isLoading = false.obs;
   late List<List<int>> solutionMatrix;
   final RxList<List<int>> currentMatrix = <List<int>>[].obs;
 
@@ -38,8 +40,8 @@ class NonogramBoardController extends GetxController {
           [1, 0, 1, 1, 0],
           [0, 1, 1, 0, 1],
           [1, 1, 1, 0, 0],
-          [0, 0, 1, 1, 1],
-          [1, 0, 0, 1, 0]
+          [1, 1, 1, 1, 1],
+          [1, 0, 1, 1, 0]
         ]
       }
     });
@@ -66,6 +68,7 @@ class NonogramBoardController extends GetxController {
   }
 
   void toggleTile(int row, int col) {
+    isLoading.value = true;
     final newVal = currentMatrix[row][col] == 1 ? 0 : 1;
     currentMatrix[row][col] = newVal;
     currentMatrix.refresh();
@@ -81,6 +84,7 @@ class NonogramBoardController extends GetxController {
         barrierDismissible: false,
       );
     }
+    isLoading.value = false;
   }
 
   bool _checkCompletion() {

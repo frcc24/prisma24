@@ -29,6 +29,10 @@ class NonogramBoard extends GetView<NonogramBoardController> {
         child: SafeArea(
           child: Center(
             child: Obx(() {
+              if (controller.isLoading.value) {
+                // return const CircularProgressIndicator();
+              }
+              
               final n = controller.size.value;
               if (n == 0) {
                 return const CircularProgressIndicator();
