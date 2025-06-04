@@ -233,8 +233,11 @@ void resetBoard() {
           .get();
       if (phases.docs.length <= index) {
         isLoading.value = false;
+        Get.snackbar('Erro', 'Fase nao implementada',
+            snackPosition: SnackPosition.BOTTOM);
         return;
       }
+
       final data = phases.docs[index].data();
       final board = Map<String, dynamic>.from(data['board'] as Map);
       final n = board['size'] as int;
