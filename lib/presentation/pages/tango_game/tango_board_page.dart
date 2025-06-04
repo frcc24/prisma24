@@ -194,7 +194,7 @@ class TangoBoardPage extends GetView<TangoBoardController> {
                               child: _buildHintIcon(h),
                             );
                           }
-                        }).toList(),
+                        }),
                       ],
                     ),
                   );

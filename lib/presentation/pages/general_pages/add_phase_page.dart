@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart' show FirebaseException;
 
 class AddPhasePage extends StatefulWidget {
   const AddPhasePage({super.key});
@@ -24,7 +23,6 @@ class _AddPhasePageState extends State<AddPhasePage> {
         setState(() => _status = 'JSON inválido: deve ser um objeto');
         return;
       }
-      final data = Map<String, dynamic>.from(decoded);
 
       // ─────────────────── Escolher ou criar o mapa ───────────────────
       final maps = FirebaseFirestore.instance.collection('maps');
