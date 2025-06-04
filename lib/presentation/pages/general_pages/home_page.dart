@@ -69,6 +69,12 @@ class HomePage extends StatelessWidget {
                 icon: Icons.settings,
                 onTap: () => Navigator.pushNamed(context, '/settings'),
               ),
+              _MenuButton(
+                color: Colors.cyan,
+                label: 'Importar mapas',
+                icon: Icons.upload_file,
+                onTap: () => Navigator.pushNamed(context, '/import_map'),
+              ),
                 _MenuButton(
                 color: Colors.red,
                 label: 'Sair',
