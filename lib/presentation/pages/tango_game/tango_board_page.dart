@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'tango_board_controller.dart';
 
 class TangoBoardPage extends StatelessWidget {
-  TangoBoardPage({Key? key}) : super(key: key);
+  TangoBoardPage({super.key});
 
   final TangoBoardController controller = Get.find<TangoBoardController>();
 
@@ -202,14 +202,15 @@ class TangoBoardPage extends StatelessWidget {
                   );
                 },
               );
-              }),
+                }),
+              ),
             ),
           ),
-        ),
-          ],
-        ),
+        ],
       ),
-  );
+    ),
+      ),
+    );
   }
 
   /// Retorna o widget de dica (círculo contendo "=" ou raio),
