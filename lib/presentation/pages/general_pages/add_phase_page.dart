@@ -62,7 +62,30 @@ class _AddPhasePageState extends State<AddPhasePage> {
 
       // 3 e 4. adicionar a fase apos garantir a existencia do mapa
       try {
-      setState(() => _status = 'Fase adicionada com sucesso!');
+        // cria o documento somente com o atributo 'game'
+        final docRef = await phases.add({'game': data['game']});
+        // em seguida adiciona o atributo 'difficulty'
+        await docRef.update({'difficulty': data['difficulty']});
+        // e finalmente adiciona o tabuleiro
+        final board = data['board'];
+        if (board is Map<String, dynamic>) {
+          await docRef.update({
+            'board': {
+              'size': board['size'],
+              'initial': board['initial'],
+              'solution': board['solution'],
+              'colors': board['colors'],
+            }
+          });
+        } else {
+          setState(() => _status = 'Tabuleiro inválido: deve ser um objeto');
+          return;
+        }
+
+
+
+        setState(() => _status = 'Fase adicionada com sucesso!');
+
       } on FirebaseException catch (e) {
         setState(() => _status = 'Erro do Firestore: ${e.message}');
       } catch (e) {
@@ -113,24 +136,29 @@ class _AddPhasePageState extends State<AddPhasePage> {
 }
 
 
-/*{
+/*
+
+{
   "game": "tango",
   "difficulty": "iniciante",
   "board": {
     "size": 4,
-    "initial": [
-      [1, 0, 0, 0],
-      [0, 2, 0, 0],
-      [0, 0, 1, 0],
-      [0, 0, 0, 2]
-    ],
-    "solution": [
-      [1, 2, 1, 2],
-      [2, 2, 1, 1],
-      [1, 1, 2, 2],
-      [2, 1, 2, 1]
-    ],
+    "initial": "[[1,0,0,0],[0,2,0,0],[0,0,1,0],[0,0,0,2]]",
+    "solution": "[[1,2,1,2],[2,2,1,1],[1,1,2,2],[2,1,2,1]]",
     "colors": ["moon", "triangle"]
   }
 }
+
+
 */
+
+List<List<int>> stringParaMatriz(String s) {
+  final listaDinamica = jsonDecode(s) as List<dynamic>;
+  return listaDinamica
+      .map((linha) => List<int>.from(linha as List<dynamic>))
+      .toList();
+}
+
+String matrizParaString(List<List<int>> matriz) {
+  return jsonEncode(matriz);
+}
