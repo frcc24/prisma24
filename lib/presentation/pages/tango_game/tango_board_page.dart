@@ -27,9 +27,15 @@ class TangoBoardPage extends StatelessWidget {
           ),
         ],
       ),
-      backgroundColor: const Color(0xFF0D0D0D),
-      body: SafeArea(
-        child: Column(
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/ui/bg_gradient.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
           children: [
             SizedBox(height: 16),
             Obx( () {
