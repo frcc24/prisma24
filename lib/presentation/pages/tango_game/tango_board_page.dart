@@ -93,8 +93,15 @@ class TangoBoardPage extends StatelessWidget {
                     final double tileSize =
                         (constraints.maxWidth - totalSpacing) / n;
 
-                    return Stack(
-                      children: [
+                    return Container(
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/images/ui/bg_gradient.png'),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      child: Stack(
+                        children: [
                         // 1) Grid de tiles
                         GridView.builder(
                           physics: const NeverScrollableScrollPhysics(),
@@ -185,9 +192,10 @@ class TangoBoardPage extends StatelessWidget {
                           }
                         }).toList(),
                       ],
-                    );
-                  },
-                );
+                    ),
+                  );
+                },
+              );
               }),
             ),
           ),
