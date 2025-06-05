@@ -7,12 +7,40 @@ import 'nonogram_board_controller.dart';
 class NonogramBoard extends GetView<NonogramBoardController> {
   const NonogramBoard({super.key});
 
+  Future<bool> _confirmExit(BuildContext context) async {
+    final res = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Sair da fase?'),
+        content: const Text('Você perderá uma vida se sair agora.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
+    );
+    if (res == true) {
+      LifeManager().loseLife();
+      return true;
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        LifeManager().loseLife();
-        return true;
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        if (await _confirmExit(context)) {
+          Navigator.pop(context);
+        }
       },
       child: Scaffold(
       appBar: AppBar(

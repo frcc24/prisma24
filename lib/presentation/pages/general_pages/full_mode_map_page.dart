@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 
 import '../../../core/progress_storage.dart';
+import '../../../core/life_manager.dart';
 import '../tango_game/tango_board_controller.dart';
 import '../nonogram_game/nonogram_board_controller.dart';
 import '../../widgets/loading_dialog.dart';
@@ -83,6 +84,29 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
   }
 
   Future<void> _openPhase(BuildContext context, int i) async {
+    if (LifeManager().lives == 0) {
+      await showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Sem vidas'),
+          content: const Text('Você não tem mais vidas para jogar.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Fechar'),
+            ),
+            TextButton(
+              onPressed: () {
+                LifeManager().fillLives();
+                Navigator.pop(context);
+              },
+              child: const Text('Assistir anúncio'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
     bool closed = false;
     showDialog(
       context: context,
