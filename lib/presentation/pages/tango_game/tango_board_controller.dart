@@ -202,7 +202,10 @@ class TangoBoardController extends GetxController {
           content: const Text('Você completou o puzzle!'),
           actions: [
             TextButton(
-              onPressed: () => Get.back(),
+              onPressed: () {
+                Get.back();
+                Get.back();
+              },
               child: const Text('OK'),
             ),
           ],
