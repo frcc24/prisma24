@@ -5,10 +5,31 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../tango_game/tango_board_controller.dart';
 import '../nonogram_game/nonogram_board_controller.dart';
 import '../../widgets/loading_dialog.dart';
+import '../../core/progress_storage.dart';
 
-class FullModeMapPage extends StatelessWidget {
+class FullModeMapPage extends StatefulWidget {
   final String mapId;
   const FullModeMapPage({super.key, required this.mapId});
+
+  @override
+  State<FullModeMapPage> createState() => _FullModeMapPageState();
+}
+
+class _FullModeMapPageState extends State<FullModeMapPage> {
+  List<int> _completed = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCompleted();
+  }
+
+  Future<void> _loadCompleted() async {
+    final storage = await ProgressStorage.getInstance();
+    setState(() {
+      _completed = storage.getCompleted(widget.mapId);
+    });
+  }
 
   static const List<Offset> _relativePoints = [
     Offset(0.1, 0.85),
@@ -26,7 +47,7 @@ class FullModeMapPage extends StatelessWidget {
   Future<int> _phaseCount() async {
     final snap = await FirebaseFirestore.instance
         .collection('maps')
-        .doc(mapId)
+        .doc(widget.mapId)
         .collection('phases')
         .get();
     return snap.size;
@@ -47,7 +68,7 @@ class FullModeMapPage extends StatelessWidget {
 
       final phases = await FirebaseFirestore.instance
           .collection('maps')
-          .doc(mapId)
+          .doc(widget.mapId)
           .collection('phases')
           .orderBy('createdAt')
           .limit(i + 1)
@@ -56,14 +77,15 @@ class FullModeMapPage extends StatelessWidget {
         final data = phases.docs[i].data();
         final game = data['game'] as String? ?? 'tango';
         if (game == 'nonogram') {
-          await Get.find<NonogramBoardController>().loadPhase(mapId, i);
+          await Get.find<NonogramBoardController>().loadPhase(widget.mapId, i);
           Navigator.of(context, rootNavigator: true).pop(); //fechar o dialog
-          Navigator.pushNamed(context, '/nonogram');
+          await Navigator.pushNamed(context, '/nonogram');
         } else {
-          await Get.find<TangoBoardController>().loadPhase(mapId, i);
+          await Get.find<TangoBoardController>().loadPhase(widget.mapId, i);
           Navigator.of(context, rootNavigator: true).pop(); //fechar o dialog
-          Navigator.pushNamed(context, '/tango');
+          await Navigator.pushNamed(context, '/tango');
         }
+        _loadCompleted();
       } else if (!closed) {
         Get.snackbar('Erro', 'Fase nao implementada',
             snackPosition: SnackPosition.BOTTOM);
@@ -115,16 +137,31 @@ class FullModeMapPage extends StatelessWidget {
                       Positioned(
                         left: points[i].dx - 30,
                         top: points[i].dy - 30,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueAccent,
-                            shape: const CircleBorder(),
-                            padding: const EdgeInsets.all(20),
-                          ),
-                          onPressed: i < phaseCount
-                              ? () => _openPhase(context, i)
-                              : null,
-                          child: Text('${i + 1}'),
+                        child: Stack(
+                          children: [
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blueAccent,
+                                shape: const CircleBorder(),
+                                padding: const EdgeInsets.all(20),
+                              ),
+                              onPressed: i < phaseCount
+                                  ? () => _openPhase(context, i)
+                                  : null,
+                              child: Text('${i + 1}'),
+                            ),
+                            if (_completed.contains(i))
+                              Positioned(
+                                bottom: 4,
+                                right: 4,
+                                child: CircleAvatar(
+                                  radius: 10,
+                                  backgroundColor: Colors.green,
+                                  child: const Icon(Icons.check,
+                                      size: 12, color: Colors.white),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                   ],

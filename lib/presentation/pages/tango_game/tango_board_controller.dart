@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/progress_storage.dart';
 
 class TangoBoardController extends GetxController {
   /// Dimensão do tabuleiro (NxN)
@@ -28,6 +29,9 @@ class TangoBoardController extends GetxController {
   final RxList<Hint> hints = <Hint>[].obs;
 
   final Random _random = Random();
+
+  String? currentMapId;
+  int? currentPhaseIndex;
 
 
   @override
@@ -188,6 +192,10 @@ class TangoBoardController extends GetxController {
 
     // 5) Se terminado, exibe o diálogo
     if (_checkCompletion()) {
+      if (currentMapId != null && currentPhaseIndex != null) {
+        ProgressStorage.getInstance().then(
+            (p) => p.addCompletion(currentMapId!, currentPhaseIndex!));
+      }
       Get.dialog(
         AlertDialog(
           title: const Text('Parabéns!'),
@@ -223,6 +231,8 @@ void resetBoard() {
 
   Future<void> loadPhase(String mapId, int index) async {
     isLoading.value = true;
+    currentMapId = mapId;
+    currentPhaseIndex = index;
     try {
       final phases = await FirebaseFirestore.instance
           .collection('maps')

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../core/progress_storage.dart';
 
 /// Controller for the Nonogram puzzle board.
 ///
@@ -27,6 +28,9 @@ class NonogramBoardController extends GetxController {
   RxBool isLoading = false.obs;
   late List<List<int>> solutionMatrix;
   final RxList<List<int>> currentMatrix = <List<int>>[].obs;
+
+  String? currentMapId;
+  int? currentPhaseIndex;
 
   /// Colors used for the tiles. [closedTileColor] is for state 0 and
   /// [selectedTileColor] for state 1.
@@ -92,6 +96,10 @@ class NonogramBoardController extends GetxController {
     currentMatrix[row][col] = newVal;
     currentMatrix.refresh();
     if (_checkCompletion()) {
+      if (currentMapId != null && currentPhaseIndex != null) {
+        ProgressStorage.getInstance().then(
+            (p) => p.addCompletion(currentMapId!, currentPhaseIndex!));
+      }
       Get.dialog(
         AlertDialog(
           title: const Text('Parabéns!'),
@@ -127,6 +135,8 @@ class NonogramBoardController extends GetxController {
   /// Carrega uma fase armazenada no Firestore.
   Future<void> loadPhase(String mapId, int index) async {
     isLoading.value = true;
+    currentMapId = mapId;
+    currentPhaseIndex = index;
     try {
       final phases = await FirebaseFirestore.instance
           .collection('maps')
