@@ -76,13 +76,13 @@ class HomePage extends StatelessWidget {
                   color: Colors.orange,
                   label: 'settings'.tr,
                   icon: Icons.settings,
-                  onTap: () => Navigator.pushNamed(context, '/settings'),
+                  onTap: () => Navigator.pushNamed(Get.context!, '/settings'),
                 ),
                 _MenuButton(
                   color: Colors.cyan,
                   label: 'add_phase'.tr,
                   icon: Icons.upload_file,
-                  onTap: () => Navigator.pushNamed(context, '/add_phase'),
+                  onTap: () => Navigator.pushNamed(Get.context!, '/add_phase'),
                 ),
                   _MenuButton(
                   color: Colors.red,
@@ -90,7 +90,7 @@ class HomePage extends StatelessWidget {
                   icon: Icons.logout,
                   onTap: () => Future.delayed(
                     Duration(milliseconds: 100),
-                    () => Navigator.of(context).maybePop().then((_) {
+                    () => Navigator.of(Get.context!).maybePop().then((_) {
                     Future.delayed(Duration(milliseconds: 200), () {
                       exit(0);
                     });

@@ -132,7 +132,7 @@ class _SettingsPageState extends State<SettingsPage> {
     if (confirm == true) {
       final storage = await ProgressStorage.getInstance();
       await storage.reset();
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(content: Text('progress_cleared'.tr)),
       );
     }

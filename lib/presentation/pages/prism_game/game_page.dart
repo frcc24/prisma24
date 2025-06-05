@@ -149,7 +149,7 @@ class GamePage extends ConsumerWidget {
             : const Duration(milliseconds: 1200);
         final elapsed = ref.read(elapsedProvider).value ?? 0;
         Future.delayed(delay,
-            () => _showEndDialog(context, ref, next.status == GameStatus.won, elapsed));
+            () => _showEndDialog(Get.context!, ref, next.status == GameStatus.won, elapsed));
       }
     });
 

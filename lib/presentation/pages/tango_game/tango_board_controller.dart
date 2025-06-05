@@ -21,6 +21,7 @@ class TangoBoardController extends GetxController {
   late List<List<int>> solutionMatrix;
 
   /// Matriz atual que o usuário vai preenchendo
+  // ignore: unintended_html_in_doc_comment
   /// Cada elemento de currentMatrix é uma List<int> simples, mas o "container" é reativo (RxList).
   final RxList<List<int>> currentMatrix = <List<int>>[].obs;
 
