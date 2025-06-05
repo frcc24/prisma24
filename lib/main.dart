@@ -16,6 +16,7 @@ import 'presentation/pages/tango_game/tango_board_page.dart';
 import 'presentation/pages/nonogram_game/nonogram_board_controller.dart'
     show NonogramBoardController;
 import 'presentation/pages/nonogram_game/nonogram_board_page.dart';
+import 'core/life_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await LifeManager().init();
 
   runApp(const ProviderScope(child: Prisma24App()));
 }

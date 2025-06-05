@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../core/life_manager.dart';
 import 'tango_board_controller.dart';
 
 class TangoBoardPage extends GetView<TangoBoardController> {
@@ -11,7 +12,12 @@ class TangoBoardPage extends GetView<TangoBoardController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        LifeManager().loseLife();
+        return true;
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Tango Puzzle'),
         backgroundColor: Colors.black,
@@ -207,6 +213,7 @@ class TangoBoardPage extends GetView<TangoBoardController> {
         ],
       ),
     ),
+      ),
       ),
     );
   }

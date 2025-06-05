@@ -9,6 +9,7 @@ import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/sfx.dart';
+import '../../../core/life_manager.dart';
 import '../../../domain/models/prism_game_models/game_state.dart';
 import '../../providers/prism_game_provider/game_provider.dart';
 import '../../widgets/prism_game_widgets/hex_board.dart';
@@ -54,6 +55,7 @@ class GamePage extends ConsumerWidget {
         ),
       ),
     );
+    );
   }
 
     Future<void> saveScore(String name, int score) =>
@@ -69,6 +71,7 @@ class GamePage extends ConsumerWidget {
 
   void _showEndDialog(
       BuildContext context, WidgetRef ref, bool won, int elapsed) {
+      if (!won) LifeManager().loseLife();
       final base   = ref.read(gameProvider.notifier).baseTiles;
       final moves  = ref.read(gameProvider.notifier).movesUsed;
       final bonus  = (10 * base / max(moves, 1)).floor();
@@ -107,7 +110,8 @@ class GamePage extends ConsumerWidget {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 
   /* ─────────────────────── Build ─────────────────────── */
@@ -138,8 +142,15 @@ class GamePage extends ConsumerWidget {
   final currentScore = base + bonus;   // sem penalidade de tempo ainda
 
 
-    return Scaffold(
-      appBar: AppBar(
+    return WillPopScope(
+      onWillPop: () async {
+        if (ref.read(gameProvider).status != GameStatus.won) {
+          LifeManager().loseLife();
+        }
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
         backgroundColor:
             controller.isAwaitingBomb ? Colors.orange.shade700 : Colors.transparent,
         elevation: 0,
@@ -175,7 +186,12 @@ class GamePage extends ConsumerWidget {
           IconButton(
             tooltip: 'Home',
             icon: const Icon(Icons.home),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              if (ref.read(gameProvider).status != GameStatus.won) {
+                LifeManager().loseLife();
+              }
+              Navigator.pop(context);
+            },
           ),
           IconButton(
             tooltip: 'Ajuda',
@@ -257,7 +273,8 @@ class GamePage extends ConsumerWidget {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 
   /* ───────── helpers ───────── */

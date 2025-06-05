@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../core/life_manager.dart';
 import 'nonogram_board_controller.dart';
 
 class NonogramBoard extends GetView<NonogramBoardController> {
@@ -8,7 +9,12 @@ class NonogramBoard extends GetView<NonogramBoardController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        LifeManager().loseLife();
+        return true;
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: const Text('Nonogram'),
         actions: [
@@ -90,6 +96,7 @@ class NonogramBoard extends GetView<NonogramBoardController> {
             }),
           ),
         ),
+      ),
       ),
     );
   }
