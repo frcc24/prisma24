@@ -143,7 +143,7 @@ class _AddPhasePageState extends State<AddPhasePage> {
   "difficulty": "iniciante",
   "board": {
     "size": 4,
-    "initial": "[[1,0,0,0],[0,2,0,0],[0,0,1,0],[0,0,0,2]]",
+    "initial": "[[1,0,0,0],[0,2,0,0],[0,0,2,0],[0,0,0,1]]",
     "solution": "[[1,2,1,2],[2,2,1,1],[1,1,2,2],[2,1,2,1]]",
     "colors": ["moon", "triangle"]
   }
