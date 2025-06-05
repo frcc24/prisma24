@@ -136,34 +136,6 @@ class _AddPhasePageState extends State<AddPhasePage> {
 }
 
 
-/*
-
-{
-  "game": "tango",
-  "difficulty": "iniciante",
-  "board": {
-    "size": 4,
-    "initial": "[[1,0,0,0],[0,2,0,0],[0,0,2,0],[0,0,0,1]]",
-    "solution": "[[1,2,1,2],[2,2,1,1],[1,1,2,2],[2,1,2,1]]",
-    "colors": ["moon", "triangle"]
-  }
-}
-
-// Exemplo de fase para o Nonogram usando o mesmo formato
-{
-  "game": "nonogram",
-  "difficulty": "iniciante",
-  "board": {
-    "size": 5,
-    "initial": "[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]",
-    "solution": "[[1,0,1,1,0],[0,1,1,0,1],[1,1,1,0,0],[0,0,1,1,1],[1,0,0,1,0]]",
-    "colors": ["blue"]
-  }
-}
-
-
-*/
-
 List<List<int>> stringParaMatriz(String s) {
   final listaDinamica = jsonDecode(s) as List<dynamic>;
   return listaDinamica
