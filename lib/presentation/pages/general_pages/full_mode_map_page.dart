@@ -49,7 +49,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
             fontWeight: FontWeight.bold,
             foreground: Paint()
               ..style = PaintingStyle.stroke
-              ..strokeWidth = 1
+              ..strokeWidth = 2
               ..color = Colors.black,
           ),
         ),
@@ -101,7 +101,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
     Widget button;
     if (btnPath != null) {
       button = Material(
-        elevation: 4,
+        elevation: 2,
         shape: const CircleBorder(),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -122,7 +122,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
       );
     } else {
       button = Material(
-        elevation: 4,
+        elevation: 2,
         shape: const CircleBorder(),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
