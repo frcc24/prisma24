@@ -7,6 +7,7 @@ import '../../../core/progress_storage.dart';
 import '../tango_game/tango_board_controller.dart';
 import '../nonogram_game/nonogram_board_controller.dart';
 import '../../widgets/loading_dialog.dart';
+import '../../widgets/lives_bar.dart';
 
 class FullModeMapPage extends StatefulWidget {
   final String mapId;
@@ -165,6 +166,12 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
                 }
                 return Stack(
                   children: [
+                    const Positioned(
+                      top: 8,
+                      left: 8,
+                      right: 8,
+                      child: Center(child: LivesBar()),
+                    ),
                     CustomPaint(
                       size: Size(constraints.maxWidth, constraints.maxHeight),
                       painter: _PathPainter(points),
