@@ -168,9 +168,9 @@ class GamePage extends ConsumerWidget {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        if (await _confirmExit(context)) {
+        if (await _confirmExit(context) && context.mounted) {
           Navigator.pop(context);
         }
       },
@@ -212,7 +212,7 @@ class GamePage extends ConsumerWidget {
             tooltip: 'Home',
             icon: const Icon(Icons.home),
             onPressed: () async {
-              if (await _confirmExit(context)) {
+              if (await _confirmExit(context) && context.mounted) {
                 Navigator.pop(context);
               }
             },
