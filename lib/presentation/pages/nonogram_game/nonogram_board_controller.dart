@@ -71,7 +71,7 @@ class NonogramBoardController extends GetxController {
     if (colorsField is List && colorsField.isNotEmpty) {
       if (colorsField.length == 1) {
         selectedTileColor = _parseColor(colorsField[0]);
-        closedTileColor = Colors.white.withOpacity(0.1);
+        closedTileColor = Colors.white.withValues(alpha: 0.1);
       } else {
         closedTileColor = _parseColor(colorsField[0]);
         selectedTileColor = _parseColor(colorsField[1]);

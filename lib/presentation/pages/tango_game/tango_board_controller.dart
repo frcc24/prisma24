@@ -33,13 +33,6 @@ class TangoBoardController extends GetxController {
   String? currentMapId;
   int? currentPhaseIndex;
 
-
-  @override
-  void onInit() {
-    super.onInit();
-
-  }
-
   /// Inicializa o tabuleiro com:
   /// - n: tamanho NxN
   /// - initial: matriz pré-preenchida (0 = vazio, 1 = moon, 2 = triangle)

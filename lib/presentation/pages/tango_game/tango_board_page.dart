@@ -257,7 +257,7 @@ class TangoBoardPage extends GetView<TangoBoardController> {
         color: hint.isEqual ? Colors.greenAccent.withAlpha(40) : Colors.redAccent.withAlpha(40),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.5),
+            color: Colors.black.withValues(alpha: 0.5),
             blurRadius: 4,
             offset: const Offset(0, 1),
           ),
@@ -297,7 +297,7 @@ class TangoBoardPage extends GetView<TangoBoardController> {
         borderRadius: BorderRadius.circular(6),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
+            color: Colors.black.withValues(alpha: 0.4),
             offset: const Offset(0, 3),
             blurRadius: 6,
             spreadRadius: 1,
@@ -334,7 +334,7 @@ class TangoBoardPage extends GetView<TangoBoardController> {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6),
-                color: Colors.black.withOpacity(0.25),
+                color: Colors.black.withValues(alpha: 0.25),
               ),
             ),
         ],

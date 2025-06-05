@@ -118,7 +118,7 @@ class _HexBoardState extends State<HexBoard> {
                             child: Image.asset(
                               widget.board[r][c].pattern.iconAsset,
                               fit: BoxFit.contain,
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                             ),
                           ),
                     ],
@@ -171,7 +171,7 @@ class _HexPainter extends CustomPainter {
       ..strokeWidth = 1;
     final fill = Paint();
     final borderOld = Paint()
-      ..color = Colors.white.withOpacity(0.35)
+      ..color = Colors.white.withValues(alpha: 0.35)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
@@ -196,7 +196,7 @@ class _HexPainter extends CustomPainter {
           canvas.drawPath(
               path,
               Paint()
-                ..color = Colors.white.withOpacity(0.6)
+                ..color = Colors.white.withValues(alpha: 0.6)
                 ..style = PaintingStyle.fill);
         }
       }
