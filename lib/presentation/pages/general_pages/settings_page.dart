@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/progress_storage.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -23,6 +25,7 @@ class _SettingsPageState extends State<SettingsPage> {
   String _playerName = 'Jogador';
   String _version = '';
   Locale _locale = const Locale('pt', 'BR');
+  User? _user = FirebaseAuth.instance.currentUser;
 
   /* carregamento inicial */
   @override
@@ -138,6 +141,31 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    try {
+      final googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return;
+      final googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      final result =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      setState(() => _user = result.user);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('error'.tr)),
+      );
+    }
+  }
+
+  Future<void> _signOut() async {
+    await FirebaseAuth.instance.signOut();
+    await GoogleSignIn().signOut();
+    setState(() => _user = null);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,6 +184,20 @@ class _SettingsPageState extends State<SettingsPage> {
             trailing: const Icon(Icons.edit),
             onTap: _editName,
           ),
+          if (_user == null)
+            ListTile(
+              title: Text('sign_in_google'.tr),
+              leading: const Icon(Icons.login),
+              onTap: _signInWithGoogle,
+            )
+          else
+            ListTile(
+              title: Text('sign_out'.tr),
+              subtitle:
+                  Text('signed_in_as'.trParams({'name': _user!.displayName ?? _user!.email ?? ''})),
+              leading: const Icon(Icons.logout),
+              onTap: _signOut,
+            ),
           ListTile(
             title: Text('app_version'.tr),
             subtitle: Text(_version.isEmpty ? '...' : _version),
