@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/progress_storage.dart';
+import '../../../core/life_manager.dart';
 
 /// Controller for the Nonogram puzzle board.
 ///
@@ -39,6 +42,58 @@ class NonogramBoardController extends GetxController {
 
   List<int> rowCounts = [];
   List<int> colCounts = [];
+
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      elapsedSeconds.value++;
+      _updateScore();
+    });
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  void stopTimer() => _stopTimer();
+
+  void _updateScore() {
+    final timePen = elapsedSeconds.value ~/ 2;
+    final clickLimit = size.value * size.value;
+    final clickPen = max(0, clicks.value - clickLimit) * 2;
+    score.value = max(0, _baseScore - timePen - clickPen);
+    if (score.value <= 0) {
+      _handleLoss();
+    }
+  }
+
+  void _handleLoss() {
+    _stopTimer();
+    LifeManager().loseLife();
+    Get.dialog(
+      AlertDialog(
+        title: Text('game_over'.tr),
+        content: Text('score_zero_msg'.tr),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+              Get.back();
+            },
+            child: Text('ok'.tr),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  final RxInt elapsedSeconds = 0.obs;
+  final RxInt clicks = 0.obs;
+  final RxInt score = 0.obs;
+  Timer? _timer;
+  int _baseScore = 0;
 
   @override
   void onInit() {
@@ -95,7 +150,10 @@ class NonogramBoardController extends GetxController {
     final newVal = currentMatrix[row][col] == 1 ? 0 : 1;
     currentMatrix[row][col] = newVal;
     currentMatrix.refresh();
+    clicks.value++;
+    _updateScore();
     if (_checkCompletion()) {
+      _stopTimer();
       if (currentMapId != null && currentPhaseIndex != null) {
         ProgressStorage.getInstance().then(
             (p) => p.addCompletion(currentMapId!, currentPhaseIndex!));
@@ -103,7 +161,7 @@ class NonogramBoardController extends GetxController {
       Get.dialog(
         AlertDialog(
           title: Text('congrats'.tr),
-          content: Text('completed_puzzle'.tr),
+          content: Text('${'completed_puzzle'.tr}\nScore: ${score.value}'),
           actions: [
             TextButton(
               onPressed: () {
@@ -136,6 +194,12 @@ class NonogramBoardController extends GetxController {
       currentMatrix[i] = List<int>.filled(size.value, 0);
     }
     currentMatrix.refresh();
+    clicks.value = 0;
+    elapsedSeconds.value = 0;
+    _baseScore = size.value * size.value * 5;
+    score.value = _baseScore;
+    _stopTimer();
+    _startTimer();
   }
 
   /// Carrega uma fase armazenada no Firestore.
@@ -184,6 +248,12 @@ class NonogramBoardController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  @override
+  void onClose() {
+    _stopTimer();
+    super.onClose();
   }
 
   Color _parseColor(dynamic value) {
