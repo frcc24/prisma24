@@ -126,7 +126,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
           .orderBy('createdAt')
           .limit(i + 1)
           .get();
-      if (!closed && phases.docs.length > i) {
+      if (!closed && context.mounted && phases.docs.length > i) {
         final data = phases.docs[i].data();
         final game = data['game'] as String? ?? 'tango';
         if (game == 'nonogram') {

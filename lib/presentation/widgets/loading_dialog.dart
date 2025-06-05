@@ -9,7 +9,7 @@ class LoadingDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {},
+      onPopInvokedWithResult: (didPop, result) {},
       child: Stack(
         children: [
           Center(
