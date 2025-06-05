@@ -55,7 +55,6 @@ class GamePage extends ConsumerWidget {
         ),
       ),
     );
-    );
   }
 
     Future<void> saveScore(String name, int score) =>
@@ -110,7 +109,6 @@ class GamePage extends ConsumerWidget {
           ),
         ],
       ),
-    ),
   );
   }
 

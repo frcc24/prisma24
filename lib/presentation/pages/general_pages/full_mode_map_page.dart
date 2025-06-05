@@ -167,10 +167,10 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
                 return Stack(
                   children: [
                     const Positioned(
-                      top: 8,
+                      top: 120,
                       left: 8,
                       right: 8,
-                      child: Center(child: LivesBar()),
+                      child: LivesBar(),
                     ),
                     CustomPaint(
                       size: Size(constraints.maxWidth, constraints.maxHeight),
