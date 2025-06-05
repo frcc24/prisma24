@@ -134,7 +134,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
             width: 60,
             height: 60,
             alignment: Alignment.center,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Colors.blueAccent,
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white54, width: 2),

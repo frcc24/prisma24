@@ -18,7 +18,7 @@ class FullModePage extends StatelessWidget {
         'id': d.id,
         'createdAt': (data['createdAt'] as Timestamp?)?.toDate(),
         'message': data['message'] ?? '',
-        'theme': data['theme'] ?? '',
+        'bg': data['bg'] ?? '',
       };
     }).toList();
   }
@@ -46,7 +46,7 @@ class FullModePage extends StatelessWidget {
               final id = map['id'] as String;
               final date = map['createdAt'] as DateTime?;
               final message = map['message'] as String?;
-              final theme = map['theme'] as String? ?? '';
+              final theme = map['bg'] as String? ?? '';
               final bgPath = theme.isNotEmpty
                   ? (theme.contains('/')
                       ? theme
