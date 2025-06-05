@@ -149,6 +149,18 @@ class _AddPhasePageState extends State<AddPhasePage> {
   }
 }
 
+// Exemplo de fase para o Nonogram usando o mesmo formato
+{
+  "game": "nonogram",
+  "difficulty": "iniciante",
+  "board": {
+    "size": 5,
+    "initial": "[[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]",
+    "solution": "[[1,0,1,1,0],[0,1,1,0,1],[1,1,1,0,0],[0,0,1,1,1],[1,0,0,1,0]]",
+    "colors": ["blue"]
+  }
+}
+
 
 */
 
