@@ -101,7 +101,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
     Widget button;
     if (btnPath != null) {
       button = Material(
-        elevation: 2,
+        elevation: 1,
         shape: const CircleBorder(),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
