@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:math';
 
 import '../../../core/progress_storage.dart';
 import '../tango_game/tango_board_controller.dart';
@@ -17,11 +18,15 @@ class FullModeMapPage extends StatefulWidget {
 
 class _FullModeMapPageState extends State<FullModeMapPage> {
   List<int> _completed = [];
+  late final List<Offset> _relativePoints;
+  String? _nextMapId;
 
   @override
   void initState() {
     super.initState();
     _loadCompleted();
+    _generatePoints();
+    _checkNextMap();
   }
 
   Future<void> _loadCompleted() async {
@@ -31,7 +36,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
     });
   }
 
-  static const List<Offset> _relativePoints = [
+  static const List<Offset> _basePoints = [
     Offset(0.1, 0.85),
     Offset(0.3, 0.70),
     Offset(0.15, 0.55),
@@ -43,6 +48,29 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
     Offset(0.75, 0.70),
     Offset(0.60, 0.85),
   ];
+
+  void _generatePoints() {
+    final rnd = Random(widget.mapId.hashCode);
+    _relativePoints = _basePoints
+        .map((p) => Offset(
+              (p.dx + rnd.nextDouble() * 0.1 - 0.05).clamp(0.05, 0.95),
+              (p.dy + rnd.nextDouble() * 0.1 - 0.05).clamp(0.05, 0.95),
+            ))
+        .toList();
+  }
+
+  Future<void> _checkNextMap() async {
+    final match = RegExp(r'(\d+)$').firstMatch(widget.mapId);
+    if (match == null) return;
+    final nextId = 'mapa${int.parse(match.group(1)!) + 1}';
+    final doc = await FirebaseFirestore.instance
+        .collection('maps')
+        .doc(nextId)
+        .get();
+    if (doc.exists) {
+      setState(() => _nextMapId = nextId);
+    }
+  }
 
   Future<int> _phaseCount() async {
     final snap = await FirebaseFirestore.instance
@@ -127,13 +155,21 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
                           p.dy * constraints.maxHeight,
                         ))
                     .toList();
+                Offset? nextPoint;
+                if (_nextMapId != null) {
+                  nextPoint = Offset(
+                    constraints.maxWidth * 0.9,
+                    constraints.maxHeight * 0.9,
+                  );
+                  points.add(nextPoint);
+                }
                 return Stack(
                   children: [
                     CustomPaint(
                       size: Size(constraints.maxWidth, constraints.maxHeight),
                       painter: _PathPainter(points),
                     ),
-                    for (int i = 0; i < points.length; i++)
+                    for (int i = 0; i < _relativePoints.length; i++)
                       Positioned(
                         left: points[i].dx - 30,
                         top: points[i].dy - 30,
@@ -160,8 +196,28 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
                                   child: const Icon(Icons.check,
                                       size: 12, color: Colors.white),
                                 ),
-                              ),
+                            ),
                           ],
+                        ),
+                      ),
+                    if (nextPoint != null)
+                      Positioned(
+                        left: nextPoint.dx - 30,
+                        top: nextPoint.dy - 30,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.purple,
+                            shape: const CircleBorder(),
+                            padding: const EdgeInsets.all(20),
+                          ),
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => FullModeMapPage(mapId: _nextMapId!),
+                              settings: const RouteSettings(name: '/full_map'),
+                            ),
+                          ),
+                          child: const Icon(Icons.arrow_forward),
                         ),
                       ),
                   ],
