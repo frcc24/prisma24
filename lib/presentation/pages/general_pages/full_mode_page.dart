@@ -46,9 +46,24 @@ class FullModePage extends StatelessWidget {
               final id = map['id'] as String;
               final date = map['createdAt'] as DateTime?;
               final message = map['message'] as String?;
+              final theme = map['theme'] as String? ?? '';
+              final bgPath = theme.isNotEmpty
+                  ? (theme.contains('/')
+                      ? theme
+                      : 'assets/images/ui/bgs/$theme')
+                  : 'assets/images/ui/bg_gradient.png';
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ListTile(
+                color: Colors.transparent,
+                clipBehavior: Clip.antiAlias,
+                child: Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(bgPath),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: ListTile(
                   title: Text('map'.trArgs(['${i + 1}'])),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,6 +82,7 @@ class FullModePage extends StatelessWidget {
                       builder: (_) => FullModeMapPage(mapId: id),
                       settings: const RouteSettings(name: '/full_map'),
                     ),
+                  ),
                   ),
                 ),
               );
