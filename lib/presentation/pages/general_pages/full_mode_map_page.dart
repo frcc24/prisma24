@@ -39,54 +39,112 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
         : 'assets/images/ui/buttons/$_btnAsset';
   }
 
+  Widget _outlinedText(String text, {double size = 18}) {
+    return Stack(
+      children: [
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: size,
+            fontWeight: FontWeight.bold,
+            foreground: Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1
+              ..color = Colors.black,
+          ),
+        ),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: size,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _outlinedIcon(IconData icon, {double size = 24}) {
+    final code = String.fromCharCode(icon.codePoint);
+    return Stack(
+      children: [
+        Text(
+          code,
+          style: TextStyle(
+            fontSize: size,
+            fontFamily: icon.fontFamily,
+            package: icon.fontPackage,
+            foreground: Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1
+              ..color = Colors.black,
+          ),
+        ),
+        Text(
+          code,
+          style: TextStyle(
+            fontSize: size,
+            fontFamily: icon.fontFamily,
+            package: icon.fontPackage,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _phaseButton(BuildContext context, int i, int phaseCount) {
     final onTap = i < phaseCount ? () => _openPhase(context, i) : null;
     final completed = _completed.contains(i);
     final btnPath = _btnPath;
+    Widget button;
     if (btnPath != null) {
-      return GestureDetector(
-        onTap: onTap,
-        child: Stack(
-          children: [
-            Image.asset(btnPath, width: 60, height: 60),
-            Positioned.fill(
-              child: Center(
-                child: Text(
-                  '${i + 1}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
+      button = Material(
+        elevation: 4,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Ink(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(btnPath),
+                fit: BoxFit.cover,
               ),
             ),
-            if (completed)
-              Positioned(
-                bottom: 4,
-                right: 4,
-                child: CircleAvatar(
-                  radius: 10,
-                  backgroundColor: Colors.green,
-                  child: const Icon(Icons.check,
-                      size: 12, color: Colors.white),
-                ),
-              ),
-          ],
+            child: Center(child: _outlinedText('${i + 1}')),
+          ),
+        ),
+      );
+    } else {
+      button = Material(
+        elevation: 4,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Container(
+            width: 60,
+            height: 60,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Colors.blueAccent,
+              shape: BoxShape.circle,
+            ),
+            child: _outlinedText('${i + 1}'),
+          ),
         ),
       );
     }
+
     return Stack(
       children: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blueAccent,
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(20),
-          ),
-          onPressed: onTap,
-          child: Text('${i + 1}'),
-        ),
+        button,
         if (completed)
           Positioned(
             bottom: 4,
@@ -306,20 +364,37 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
                       Positioned(
                         left: nextPoint.dx - 30,
                         top: nextPoint.dy - 30,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.purple,
-                            shape: const CircleBorder(),
-                            padding: const EdgeInsets.all(20),
-                          ),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => FullModeMapPage(mapId: _nextMapId!),
-                              settings: const RouteSettings(name: '/full_map'),
+                        child: Material(
+                          elevation: 4,
+                          shape: const CircleBorder(),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => FullModeMapPage(mapId: _nextMapId!),
+                                settings: const RouteSettings(name: '/full_map'),
+                              ),
+                            ),
+                            customBorder: const CircleBorder(),
+                            child: Ink(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                image: _btnPath != null
+                                    ? DecorationImage(
+                                        image: AssetImage(_btnPath!),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : null,
+                                color: _btnPath == null ? Colors.purple : null,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: _outlinedIcon(Icons.arrow_forward),
+                              ),
                             ),
                           ),
-                          child: const Icon(Icons.arrow_forward),
                         ),
                       ),
                   ],
