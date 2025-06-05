@@ -36,6 +36,7 @@ class FullModeMapPage extends StatelessWidget {
     bool closed = false;
     showDialog(
       context: context,
+      rootNavigator: true,
       barrierDismissible: false,
       barrierColor: Colors.black54,
       builder: (_) => LoadingDialog(onClose: () {
