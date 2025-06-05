@@ -1,122 +1,55 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../tango_game/tango_board_controller.dart';
-import '../nonogram_game/nonogram_board_controller.dart';
+import 'package:flutter/material.dart';
+
+import 'full_mode_map_page.dart';
 
 class FullModePage extends StatelessWidget {
   const FullModePage({super.key});
 
-  static const List<Offset> _relativePoints = [
-    Offset(0.1, 0.85),
-    Offset(0.3, 0.70),
-    Offset(0.15, 0.55),
-    Offset(0.35, 0.40),
-    Offset(0.20, 0.25),
-    Offset(0.50, 0.20),
-    Offset(0.70, 0.35),
-    Offset(0.55, 0.55),
-    Offset(0.75, 0.70),
-    Offset(0.60, 0.85),
-  ];
+  Future<List<String>> _maps() async {
+    final snap = await FirebaseFirestore.instance
+        .collection('maps')
+        .orderBy('createdAt')
+        .get();
+    return snap.docs.map((d) => d.id).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+        title: const Text('Escolha o mapa'),
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/ui/bg_gradient.png'),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final points = _relativePoints
-                .map((p) => Offset(p.dx * constraints.maxWidth,
-                    p.dy * constraints.maxHeight))
-                .toList();
-            return Stack(
-              children: [
-                CustomPaint(
-                  size: Size(constraints.maxWidth, constraints.maxHeight),
-                  painter: _PathPainter(points),
-                ),
-                for (int i = 0; i < points.length; i++)
-                  Positioned(
-                    left: points[i].dx - 30,
-                    top: points[i].dy - 30,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        shape: const CircleBorder(),
-                        padding: const EdgeInsets.all(20),
-                      ),
-                      onPressed: () async {
-                        final phases = await FirebaseFirestore.instance
-                            .collection('maps')
-                            .doc('mapa1')
-                            .collection('phases')
-                            .orderBy('createdAt')
-                            .limit(i + 1)
-                            .get();
-                        if (phases.docs.length <= i) {
-                          Get.snackbar('Erro', 'Fase nao implementada',
-                              snackPosition: SnackPosition.BOTTOM);
-                          return;
-                        }
-
-                        final data = phases.docs[i].data();
-                        final game = data['game'] as String? ?? 'tango';
-                        if (game == 'nonogram') {
-                          await Get.find<NonogramBoardController>()
-                              .loadPhase('mapa1', i);
-                          Navigator.pushNamed(context, '/nonogram');
-                        } else {
-                          await Get.find<TangoBoardController>()
-                              .loadPhase('mapa1', i);
-                          Navigator.pushNamed(context, '/tango');
-                        }
-                      },
-                      child: Text('${i + 1}'),
-                    ),
+      body: FutureBuilder<List<String>>( 
+        future: _maps(),
+        builder: (context, snap) {
+          if (!snap.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final maps = snap.data!;
+          if (maps.isEmpty) {
+            return const Center(child: Text('Nenhum mapa disponível'));
+          }
+          return ListView.separated(
+            itemCount: maps.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemBuilder: (context, i) {
+              final id = maps[i];
+              return ListTile(
+                title: Text('Mapa ${i + 1}'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FullModeMapPage(mapId: id),
+                    settings: const RouteSettings(name: '/full_map'),
                   ),
-              ],
-            );
-          },
-        ),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
-}
-
-class _PathPainter extends CustomPainter {
-  final List<Offset> points;
-  _PathPainter(this.points);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (points.length < 2) return;
-    final paint = Paint()
-      ..color = Colors.white38
-      ..strokeWidth = 4
-      ..style = PaintingStyle.stroke;
-    final path = Path()..moveTo(points.first.dx, points.first.dy);
-    for (final p in points.skip(1)) {
-      path.lineTo(p.dx, p.dy);
-    }
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
