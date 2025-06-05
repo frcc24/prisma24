@@ -30,7 +30,7 @@ void main() async {
   );
 
   // Enable offline persistence for Firestore
-  await FirebaseFirestore.instance.settings =
+  FirebaseFirestore.instance.settings =
       const Settings(persistenceEnabled: true);
 
   await LifeManager().init();
