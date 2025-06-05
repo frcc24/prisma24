@@ -29,9 +29,16 @@ class FullModePage extends StatelessWidget {
       appBar: AppBar(
         title: Text('choose_map'.tr),
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: _maps(),
-        builder: (context, snap) {
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/ui/bg_gradient.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: FutureBuilder<List<Map<String, dynamic>>>(
+          future: _maps(),
+          builder: (context, snap) {
           if (!snap.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -56,40 +63,54 @@ class FullModePage extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 color: Colors.transparent,
                 clipBehavior: Clip.antiAlias,
-                child: Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage(bgPath),
-                      fit: BoxFit.cover,
+                child: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage(bgPath),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                  ),
-                  child: ListTile(
-                  title: Text('map'.trArgs(['${i + 1}'])),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(date != null
-                          ? 'Criado em ${date.day}/${date.month}/${date.year}'
-                          : 'Sem data'),
-                      if (message != null && message.isNotEmpty)
-                        Text(message),
-                    ],
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => FullModeMapPage(mapId: id),
-                      settings: const RouteSettings(name: '/full_map'),
+                    Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.transparent, Colors.black54],
+                        ),
+                      ),
                     ),
-                  ),
-                  ),
+                    ListTile(
+                      title: Text('map'.trArgs(['${i + 1}'])),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(date != null
+                              ? 'Criado em ${date.day}/${date.month}/${date.year}'
+                              : 'Sem data'),
+                          if (message != null && message.isNotEmpty)
+                            Text(message),
+                        ],
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => FullModeMapPage(mapId: id),
+                          settings: const RouteSettings(name: '/full_map'),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
           );
         },
       ),
-    );
+    ),
+  );
   }
 }
