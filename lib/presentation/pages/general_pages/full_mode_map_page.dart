@@ -247,7 +247,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.black54,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
