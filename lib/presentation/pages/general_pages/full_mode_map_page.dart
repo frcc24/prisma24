@@ -36,7 +36,7 @@ class FullModeMapPage extends StatelessWidget {
     bool closed = false;
     showDialog(
       context: context,
-      rootNavigator: true,
+      useRootNavigator: true,
       barrierDismissible: false,
       barrierColor: Colors.black54,
       builder: (_) => LoadingDialog(onClose: () {
@@ -44,7 +44,7 @@ class FullModeMapPage extends StatelessWidget {
         Navigator.of(context, rootNavigator: true).pop();
       }),
     );
-    try {
+
       final phases = await FirebaseFirestore.instance
           .collection('maps')
           .doc(mapId)
@@ -57,18 +57,18 @@ class FullModeMapPage extends StatelessWidget {
         final game = data['game'] as String? ?? 'tango';
         if (game == 'nonogram') {
           await Get.find<NonogramBoardController>().loadPhase(mapId, i);
-          if (!closed) Navigator.pushNamed(context, '/nonogram');
+          Navigator.of(context, rootNavigator: true).pop(); //fechar o dialog
+          Navigator.pushNamed(context, '/nonogram');
         } else {
           await Get.find<TangoBoardController>().loadPhase(mapId, i);
-          if (!closed) Navigator.pushNamed(context, '/tango');
+          Navigator.of(context, rootNavigator: true).pop(); //fechar o dialog
+          Navigator.pushNamed(context, '/tango');
         }
       } else if (!closed) {
         Get.snackbar('Erro', 'Fase nao implementada',
             snackPosition: SnackPosition.BOTTOM);
       }
-    } finally {
-      if (!closed) Navigator.of(context, rootNavigator: true).pop();
-    }
+    
   }
 
   @override
