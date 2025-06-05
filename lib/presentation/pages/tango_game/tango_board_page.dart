@@ -29,6 +29,7 @@ class TangoBoardPage extends GetView<TangoBoardController> {
       ),
     );
     if (res == true) {
+      controller.stopTimer();
       LifeManager().loseLife();
       return true;
     }
@@ -104,6 +105,21 @@ class TangoBoardPage extends GetView<TangoBoardController> {
                     ),
                   ],
                 );
+            }),
+
+            Obx(() {
+              final secs = controller.elapsedSeconds.value;
+              final m = (secs ~/ 60).toString().padLeft(2, '0');
+              final s = (secs % 60).toString().padLeft(2, '0');
+              final sc = controller.score.value;
+              return Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  'time_score'
+                      .trParams({'elapsed': '$m:$s', 'score': '$sc'}),
+                  style: const TextStyle(color: Colors.white),
+                ),
+              );
             }),
 
             Padding(
