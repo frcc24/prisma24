@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../core/progress_storage.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -78,6 +79,28 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<void> _resetProgress() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Resetar progresso?'),
+        content: const Text(
+            'Fases concluídas serão removidas e você terá que jogar tudo novamente.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Confirmar')),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      final storage = await ProgressStorage.getInstance();
+      await storage.reset();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Progresso apagado')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,6 +122,13 @@ class _SettingsPageState extends State<SettingsPage> {
           ListTile(
             title: const Text('Versão do app'),
             subtitle: Text(_version.isEmpty ? '...' : _version),
+          ),
+          const Divider(),
+          ListTile(
+            title: const Text('Resetar fases'),
+            subtitle: const Text('Apagar progresso salvo'),
+            trailing: const Icon(Icons.restore),
+            onTap: _resetProgress,
           ),
           const Divider(),
           ListTile(
