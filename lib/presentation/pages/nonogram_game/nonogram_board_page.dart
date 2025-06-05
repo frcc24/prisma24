@@ -124,7 +124,9 @@ class NonogramBoard extends GetView<NonogramBoardController> {
           key: ValueKey<int>(state),
           margin: const EdgeInsets.all(1),
           decoration: BoxDecoration(
-            color: state == 1 ? Colors.blueAccent : Colors.grey.shade900,
+            color: state == 1
+                ? controller.selectedTileColor
+                : controller.closedTileColor,
             borderRadius: BorderRadius.circular(4),
             border: Border.all(color: Colors.grey.shade700),
           ),
