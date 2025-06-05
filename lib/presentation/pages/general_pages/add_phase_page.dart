@@ -61,11 +61,13 @@ class _AddPhasePageState extends State<AddPhasePage> {
       // 3 e 4. adicionar a fase apos garantir a existencia do mapa
       try {
         // cria o documento somente com o atributo 'game'
-        final docRef = await phases.add({'game': data['game']});
+        final docRef = await phases.add({'game': decoded['game']});
         // em seguida adiciona o atributo 'difficulty'
-        await docRef.update({'difficulty': data['difficulty']});
+        await docRef.update({'difficulty': decoded['difficulty']});
+        // adiciona createdAt com timestamp do servidor
+        await docRef.update({'createdAt': FieldValue.serverTimestamp()});
         // e finalmente adiciona o tabuleiro
-        final board = data['board'];
+        final board = decoded['board'];
         if (board is Map<String, dynamic>) {
           await docRef.update({
             'board': {
