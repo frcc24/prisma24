@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/progress_storage.dart';
+import '../../../core/sfx.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -17,7 +18,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   /* chaves no SharedPreferences */
-  static const _kSoundKey = 'sound_on';
+  static const _kSoundKey = Sfx.soundPrefKey;
   static const _kNameKey  = 'player_name';
   static const _kLocaleKey = 'locale';
 
@@ -50,6 +51,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _toggleSound(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kSoundKey, value);
+    Sfx().enabled = value;
     setState(() => _soundOn = value);
   }
 
