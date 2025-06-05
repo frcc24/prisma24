@@ -8,7 +8,7 @@ class LifeManager extends ChangeNotifier {
   factory LifeManager() => _instance;
 
   static const int maxLives = 5;
-  static const Duration refillDuration = Duration(minutes: 10);
+  static const Duration refillDuration = Duration(minutes: 1);
 
   static const _kLivesKey = 'lives';
 
