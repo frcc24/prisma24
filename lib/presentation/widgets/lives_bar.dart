@@ -33,19 +33,26 @@ class _LivesBarState extends State<LivesBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Icon(Icons.favorite, color: Colors.redAccent),
-        const SizedBox(width: 4),
-        Text('${manager.lives}'),
-        if (!manager.isFull) ...[
-          const SizedBox(width: 16),
-          const Icon(Icons.timer, size: 18),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.favorite, color: Colors.redAccent),
           const SizedBox(width: 4),
-          Text(_format(manager.timeLeft)),
+          Text('${manager.lives}'),
+          if (!manager.isFull) ...[
+            const SizedBox(width: 16),
+            const Icon(Icons.timer, size: 18),
+            const SizedBox(width: 4),
+            Text(_format(manager.timeLeft)),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
