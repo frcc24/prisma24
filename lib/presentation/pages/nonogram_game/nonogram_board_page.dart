@@ -26,6 +26,7 @@ class NonogramBoard extends GetView<NonogramBoardController> {
       ),
     );
     if (res == true) {
+      controller.stopTimer();
       LifeManager().loseLife();
       return true;
     }
@@ -80,6 +81,19 @@ class NonogramBoard extends GetView<NonogramBoardController> {
                     height: boardSize + 24,
                     child: Column(
                       children: [
+                        Obx(() {
+                          final secs = controller.elapsedSeconds.value;
+                          final m = (secs ~/ 60).toString().padLeft(2, '0');
+                          final s = (secs % 60).toString().padLeft(2, '0');
+                          final sc = controller.score.value;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Text(
+                              'time_score'.trParams({'elapsed': '$m:$s', 'score': '$sc'}),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          );
+                        }),
                         Row(
                           children: [
                             const SizedBox(width: 24, height: 24),

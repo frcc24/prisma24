@@ -1,12 +1,14 @@
 // tango_board_controller.dart
 
 import 'dart:math';
+import 'dart:async';
 
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/progress_storage.dart';
+import '../../../core/life_manager.dart';
 
 class TangoBoardController extends GetxController {
   /// Dimensão do tabuleiro (NxN)
@@ -31,8 +33,64 @@ class TangoBoardController extends GetxController {
 
   final Random _random = Random();
 
+  final RxInt elapsedSeconds = 0.obs;
+  final RxInt clicks = 0.obs;
+  final RxInt hintsUsed = 0.obs;
+  final RxInt score = 0.obs;
+  Timer? _timer;
+  int _baseScore = 0;
+
   String? currentMapId;
   int? currentPhaseIndex;
+
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      elapsedSeconds.value++;
+      _updateScore();
+    });
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  void stopTimer() => _stopTimer();
+
+  void _updateScore() {
+    final timePen = elapsedSeconds.value ~/ 2;
+    final clickLimit = sizeN.value * sizeN.value;
+    final clickPen = max(0, clicks.value - clickLimit) * 2;
+    final hintPen = hintsUsed.value * 50;
+    score.value = max(0, _baseScore - timePen - clickPen - hintPen);
+    if (score.value <= 0) {
+      _handleLoss();
+    }
+  }
+
+  void _handleLoss() {
+    if (_timer != null) {
+      _stopTimer();
+    }
+    LifeManager().loseLife();
+    Get.dialog(
+      AlertDialog(
+        title: Text('game_over'.tr),
+        content: Text('score_zero_msg'.tr),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+              Get.back();
+            },
+            child: Text('ok'.tr),
+          ),
+        ],
+      ),
+      barrierDismissible: false,
+    );
+  }
 
   /// Inicializa o tabuleiro com:
   /// - n: tamanho NxN
@@ -149,6 +207,8 @@ class TangoBoardController extends GetxController {
     // Escolhe uma aleatoriamente
     final idx = _random.nextInt(ocultas.length);
     ocultas[idx].hidden = false;
+    hintsUsed.value++;
+    _updateScore();
 
     // Como modificamos um Hint dentro de hints, precisamos chamar refresh() para atualizar a UI
     hints.refresh();
@@ -180,12 +240,15 @@ class TangoBoardController extends GetxController {
 
     // 3) Atribui diretamente na lista interna
     currentMatrix[row][col] = novoValor;
+    clicks.value++;
+    _updateScore();
 
     // 4) Para que Obx saiba que a matriz inteira mudou, chamamos refresh() no RxList
     currentMatrix.refresh();
 
     // 5) Se terminado, exibe o diálogo
     if (_checkCompletion()) {
+      _stopTimer();
       if (currentMapId != null && currentPhaseIndex != null) {
         ProgressStorage.getInstance().then(
             (p) => p.addCompletion(currentMapId!, currentPhaseIndex!));
@@ -193,7 +256,8 @@ class TangoBoardController extends GetxController {
       Get.dialog(
         AlertDialog(
           title: Text('congrats'.tr),
-          content: Text('completed_puzzle'.tr),
+          content:
+              Text('${'completed_puzzle'.tr}\nScore: ${score.value}'),
           actions: [
             TextButton(
               onPressed: () {
@@ -222,6 +286,14 @@ void resetBoard() {
     // 2) Gera novamente as dicas para que 20% já fiquem visíveis
     _generateHints();
     hints.refresh();
+
+    clicks.value = 0;
+    hintsUsed.value = 0;
+    elapsedSeconds.value = 0;
+    _baseScore = sizeN.value * sizeN.value * 5;
+    score.value = _baseScore;
+    _stopTimer();
+    _startTimer();
 
     isLoading.value = false;
 }
@@ -256,6 +328,12 @@ void resetBoard() {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  @override
+  void onClose() {
+    _stopTimer();
+    super.onClose();
   }
 
 }
