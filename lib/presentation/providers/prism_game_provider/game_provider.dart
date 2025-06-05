@@ -57,6 +57,7 @@ _baseTiles += (newCount - oldCount); // acumula
 _movesUsed += 1;
 
     // calcula pontuação se venceu
+    // ignore: no_leading_underscores_for_local_identifiers
     int _calcScore() {
       final seconds = DateTime.now().difference(state.startTime).inSeconds;
       final timeBonus = max(0, 600 - seconds); // 10 min → 0 bônus
