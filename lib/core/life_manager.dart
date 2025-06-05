@@ -72,4 +72,13 @@ class LifeManager extends ChangeNotifier {
       _timer = null;
     }
   }
+
+  /// Fills lives to the maximum value immediately.
+  void fillLives() {
+    _lives = maxLives;
+    _timer?.cancel();
+    _timer = null;
+    _saveLives();
+    notifyListeners();
+  }
 }

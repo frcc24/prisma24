@@ -29,6 +29,31 @@ final elapsedProvider = StreamProvider.autoDispose<int>((ref) async* {
 class GamePage extends ConsumerWidget {
   const GamePage({super.key});
 
+  Future<bool> _confirmExit(BuildContext context) async {
+    final res = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Sair da fase?'),
+        content: const Text('Você perderá uma vida se sair agora.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
+    );
+    if (res == true) {
+      LifeManager().loseLife();
+      return true;
+    }
+    return false;
+  }
+
   /* ───────── Ajuda ───────── */
   void _showHelp(BuildContext context) {
     showModalBottomSheet(
@@ -140,12 +165,13 @@ class GamePage extends ConsumerWidget {
   final currentScore = base + bonus;   // sem penalidade de tempo ainda
 
 
-    return WillPopScope(
-      onWillPop: () async {
-        if (ref.read(gameProvider).status != GameStatus.won) {
-          LifeManager().loseLife();
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        if (await _confirmExit(context)) {
+          Navigator.pop(context);
         }
-        return true;
       },
       child: Scaffold(
         appBar: AppBar(
@@ -184,11 +210,10 @@ class GamePage extends ConsumerWidget {
           IconButton(
             tooltip: 'Home',
             icon: const Icon(Icons.home),
-            onPressed: () {
-              if (ref.read(gameProvider).status != GameStatus.won) {
-                LifeManager().loseLife();
+            onPressed: () async {
+              if (await _confirmExit(context)) {
+                Navigator.pop(context);
               }
-              Navigator.pop(context);
             },
           ),
           IconButton(
