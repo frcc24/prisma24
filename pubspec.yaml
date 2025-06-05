@@ -50,6 +50,8 @@ flutter:
     - assets/images/icons/
     - assets/images/powerups/
     - assets/images/ui/
+    - assets/images/ui/bgs/
+    - assets/images/ui/buttons/
     - assets/animations/
     - assets/audio/
     - assets/animations/confetti_win.json
