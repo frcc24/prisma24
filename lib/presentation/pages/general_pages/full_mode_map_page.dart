@@ -115,7 +115,6 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
                 image: AssetImage(btnPath),
                 fit: BoxFit.cover,
               ),
-              border: Border.all(color: Colors.white54, width: 2),
               shape: BoxShape.circle,
             ),
             child: Center(child: _outlinedText('${i + 1}')),
@@ -137,7 +136,6 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
             decoration: BoxDecoration(
               color: Colors.blueAccent,
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white54, width: 2),
             ),
             child: _outlinedText('${i + 1}'),
           ),

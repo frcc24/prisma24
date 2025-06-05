@@ -402,7 +402,6 @@ class _ColorDot extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: selected ? 3 : 1.5),
         boxShadow: [
           if (selected) const BoxShadow(blurRadius: 6, spreadRadius: 1),
         ],
