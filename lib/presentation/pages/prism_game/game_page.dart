@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
 
 import '../../../core/sfx.dart';
 import '../../../core/life_manager.dart';
@@ -33,16 +34,16 @@ class GamePage extends ConsumerWidget {
     final res = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Sair da fase?'),
-        content: const Text('Você perderá uma vida se sair agora.'),
+        title: Text('exit_stage_q'.tr),
+        content: Text('lose_life_msg'.tr),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text('cancel'.tr),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Sair'),
+            child: Text('exit'.tr),
           ),
         ],
       ),
@@ -67,15 +68,15 @@ class GamePage extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text('Como jogar',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            SizedBox(height: 12),
-            Text('• Toque em uma cor para expandir seu território.'),
-            Text('• Ícones controlam a direção da expansão.'),
-            Text('• Conquiste todo o tabuleiro em 24 jogadas.'),
-            Text('• 🔥 toca em bomba depois em qualquer peça para convertê-la.'),
-            Text('• ↺ desfaz o último turno.'),
+          children: [
+            Text('how_to_play'.tr,
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            Text('help_line1'.tr),
+            Text('help_line2'.tr),
+            Text('help_line3'.tr),
+            Text('help_line4'.tr),
+            Text('help_line5'.tr),
           ],
         ),
       ),
@@ -113,7 +114,7 @@ class GamePage extends ConsumerWidget {
       barrierDismissible: false,
       builder: (_) => AlertDialog(
         backgroundColor: Colors.black87,
-        title: Text(won ? 'Você venceu!' : 'Fim das jogadas'),
+        title: Text(won ? 'victory'.tr : 'game_over'.tr),
         content: Text(
           'Base: $base'
           '\nBônus eficiência: +$bonus'
@@ -130,7 +131,7 @@ class GamePage extends ConsumerWidget {
               ref.refresh(elapsedProvider);
               Navigator.of(context).pop();
             },
-            child: const Text('Novo jogo'),
+            child: Text('new_game'.tr),
           ),
         ],
       ),
@@ -217,7 +218,7 @@ class GamePage extends ConsumerWidget {
             },
           ),
           IconButton(
-            tooltip: 'Ajuda',
+            tooltip: 'help'.tr,
             icon: const Icon(Icons.help_outline),
             onPressed: () => _showHelp(context),
           ),
@@ -238,18 +239,18 @@ class GamePage extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 4.0, bottom: 2),
                 child: Text(
-                  'Movimentos restantes: ${game.movesLeft}',
+                  'moves_left'.trArgs(['${game.movesLeft}']),
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
-              Text('Tempo: $elapsed   ·   Pontos: $currentScore',
+              Text('time_score'.trParams({'elapsed': elapsed, 'score': '$currentScore'}),
                   style: Theme.of(context).textTheme.bodyMedium),
               if (controller.isAwaitingBomb)
-                const Padding(
-                  padding: EdgeInsets.only(top: 6),
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
                   child: Text(
-                    'Toque em uma peça para usar a bomba',
-                    style: TextStyle(color: Colors.orangeAccent),
+                    'bomb_prompt'.tr,
+                    style: const TextStyle(color: Colors.orangeAccent),
                   ),
                 ),
               const SizedBox(height: 4),
@@ -317,7 +318,7 @@ class _UndoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _stackedIcon(
         icon: Icons.undo,
-        tooltip: 'Desfazer ($remaining)',
+        tooltip: 'undo'.trArgs(['$remaining']),
         value: remaining,
         colorBadge: remaining == 0 ? Colors.grey : Colors.orangeAccent,
         onPressed: onPressed,
@@ -329,7 +330,7 @@ class _ResetButton extends StatelessWidget {
   const _ResetButton({required this.onPressed});
   @override
   Widget build(BuildContext context) => IconButton(
-        tooltip: 'Reiniciar',
+        tooltip: 'restart'.tr,
         icon: const Icon(Icons.refresh),
         onPressed: onPressed,
       );
@@ -345,10 +346,10 @@ class _BombButton extends StatelessWidget {
   Widget build(BuildContext context) => _stackedIcon(
         icon: Icons.whatshot,
         tooltip: awaiting
-            ? 'Cancelar bomba'
+            ? 'cancel_bomb'.tr
             : remaining > 0
-                ? 'Bomba ($remaining)'
-                : 'Sem bombas',
+                ? 'bomb'.trArgs(['$remaining'])
+                : 'no_bombs'.tr,
         value: remaining,
         colorBadge: remaining == 0 ? Colors.grey : Colors.redAccent,
         iconColor: awaiting ? Colors.yellow : null,

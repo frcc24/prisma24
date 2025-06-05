@@ -198,15 +198,15 @@ class TangoBoardController extends GetxController {
       }
       Get.dialog(
         AlertDialog(
-          title: const Text('Parabéns!'),
-          content: const Text('Você completou o puzzle!'),
+          title: Text('congrats'.tr),
+          content: Text('completed_puzzle'.tr),
           actions: [
             TextButton(
               onPressed: () {
                 Get.back();
                 Get.back();
               },
-              child: const Text('OK'),
+              child: Text('ok'.tr),
             ),
           ],
         ),

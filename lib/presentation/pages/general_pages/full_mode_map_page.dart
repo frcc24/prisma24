@@ -88,19 +88,19 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
       await showDialog(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Sem vidas'),
-          content: const Text('Você não tem mais vidas para jogar.'),
+          title: Text('no_lives'.tr),
+          content: Text('no_lives_msg'.tr),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Fechar'),
+              child: Text('close'.tr),
             ),
             TextButton(
               onPressed: () {
                 LifeManager().fillLives();
                 Navigator.pop(context);
               },
-              child: const Text('Assistir anúncio'),
+              child: Text('watch_ad'.tr),
             ),
           ],
         ),
@@ -140,7 +140,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
         }
         _loadCompleted();
       } else if (!closed) {
-        Get.snackbar('Erro', 'Fase nao implementada',
+        Get.snackbar('error'.tr, 'phase_not_impl'.tr,
             snackPosition: SnackPosition.BOTTOM);
       }
     

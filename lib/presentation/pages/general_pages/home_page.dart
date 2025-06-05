@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -43,7 +44,7 @@ class HomePage extends StatelessWidget {
                 // botões ocupam 80 % da largura; máx 380 px
                 _MenuButton(
                   color: Colors.green,
-                  label: 'Iniciar jogo Prism',
+                  label: 'start_prism'.tr,
                   icon: Icons.play_arrow,
                   onTap: () => Navigator.pushNamed(context, '/prism'),
                 ),
@@ -61,31 +62,31 @@ class HomePage extends StatelessWidget {
                 // ),
                 _MenuButton(
                   color: Colors.purpleAccent,
-                  label: 'Iniciar modo completo',
+                  label: 'start_full'.tr,
                   icon: Icons.map,
                   onTap: () => Navigator.pushNamed(context, '/full'),
                 ),
                 _MenuButton(
                   color: Colors.blue,
-                  label: 'Placares',
+                  label: 'leaderboards'.tr,
                   icon: Icons.bar_chart,
                   onTap: () => Navigator.pushNamed(context, '/rank'),
                 ),
                 _MenuButton(
                   color: Colors.orange,
-                  label: 'Configurações',
+                  label: 'settings'.tr,
                   icon: Icons.settings,
                   onTap: () => Navigator.pushNamed(context, '/settings'),
                 ),
                 _MenuButton(
                   color: Colors.cyan,
-                  label: 'Adicionar fase',
+                  label: 'add_phase'.tr,
                   icon: Icons.upload_file,
                   onTap: () => Navigator.pushNamed(context, '/add_phase'),
                 ),
                   _MenuButton(
                   color: Colors.red,
-                  label: 'Sair',
+                  label: 'exit'.tr,
                   icon: Icons.logout,
                   onTap: () => Future.delayed(
                     Duration(milliseconds: 100),
