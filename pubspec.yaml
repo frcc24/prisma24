@@ -29,6 +29,10 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: 0.20.2
+dependency_overrides:
+  intl: any
+
+
 
 dev_dependencies:
   flutter_test:
