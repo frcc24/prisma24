@@ -95,7 +95,8 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
   }
 
   Widget _phaseButton(BuildContext context, int i, int phaseCount) {
-    final onTap = i < phaseCount ? () => _openPhase(context, i) : null;
+    if (i >= phaseCount) return const SizedBox.shrink();
+    final onTap = () => _openPhase(context, i);
     final completed = _completed.contains(i);
     final btnPath = _btnPath;
     Widget button;
