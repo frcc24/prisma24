@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../core/progress_storage.dart';
 import '../tango_game/tango_board_controller.dart';
 import '../nonogram_game/nonogram_board_controller.dart';
 import '../../widgets/loading_dialog.dart';
-import '../../core/progress_storage.dart';
 
 class FullModeMapPage extends StatefulWidget {
   final String mapId;
