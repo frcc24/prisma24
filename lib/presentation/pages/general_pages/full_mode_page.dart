@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../tango_game/tango_board_controller.dart';
+import '../nonogram_game/nonogram_board_controller.dart';
 
 class FullModePage extends StatelessWidget {
   const FullModePage({super.key});
@@ -59,7 +61,32 @@ class FullModePage extends StatelessWidget {
                         shape: const CircleBorder(),
                         padding: const EdgeInsets.all(20),
                       ),
-                        onPressed: () async { await Get.find<TangoBoardController>().loadPhase('mapa1', i); Navigator.pushNamed(context, '/tango'); },
+                      onPressed: () async {
+                        final phases = await FirebaseFirestore.instance
+                            .collection('maps')
+                            .doc('mapa1')
+                            .collection('phases')
+                            .orderBy('createdAt')
+                            .limit(i + 1)
+                            .get();
+                        if (phases.docs.length <= i) {
+                          Get.snackbar('Erro', 'Fase nao implementada',
+                              snackPosition: SnackPosition.BOTTOM);
+                          return;
+                        }
+
+                        final data = phases.docs[i].data();
+                        final game = data['game'] as String? ?? 'tango';
+                        if (game == 'nonogram') {
+                          await Get.find<NonogramBoardController>()
+                              .loadPhase('mapa1', i);
+                          Navigator.pushNamed(context, '/nonogram');
+                        } else {
+                          await Get.find<TangoBoardController>()
+                              .loadPhase('mapa1', i);
+                          Navigator.pushNamed(context, '/tango');
+                        }
+                      },
                       child: Text('${i + 1}'),
                     ),
                   ),
