@@ -62,78 +62,88 @@ class NonogramBoard extends GetView<NonogramBoardController> {
           ),
         ),
         child: SafeArea(
-          child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
             child: Obx(() {
               if (controller.isLoading.value) {
                 // return const CircularProgressIndicator();
               }
-              
+
               final n = controller.size.value;
               if (n == 0) {
                 return const CircularProgressIndicator();
               }
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  final boardSize = math.min(constraints.maxWidth, constraints.maxHeight) - 24;
-                  final tileSize = boardSize / n;
-                  return SizedBox(
-                    width: boardSize + 24,
-                    height: boardSize + 24,
-                    child: Column(
-                      children: [
-                        Obx(() {
-                          final secs = controller.elapsedSeconds.value;
-                          final m = (secs ~/ 60).toString().padLeft(2, '0');
-                          final s = (secs % 60).toString().padLeft(2, '0');
-                          final sc = controller.score.value;
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Text(
-                              'time_score'.trParams({'elapsed': '$m:$s', 'score': '$sc'}),
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          );
-                        }),
-                        Row(
-                          children: [
-                            const SizedBox(width: 24, height: 24),
-                            for (int c = 0; c < n; c++)
-                              SizedBox(
-                                width: tileSize,
-                                child: Center(
-                                  child: Text(
-                                    '${controller.colCounts[c]}',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        for (int r = 0; r < n; r++)
-                          Row(
-                            children: [
-                              SizedBox(
-                                width: 24,
-                                height: tileSize,
-                                child: Center(
-                                  child: Text(
-                                    '${controller.rowCounts[r]}',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ),
-                              ),
-                              for (int c = 0; c < n; c++)
-                                SizedBox(
-                                  width: tileSize,
-                                  height: tileSize,
-                                  child: _buildTile(r, c, controller.currentMatrix[r][c]),
-                                ),
-                            ],
-                          ),
-                      ],
+
+              final secs = controller.elapsedSeconds.value;
+              final m = (secs ~/ 60).toString().padLeft(2, '0');
+              final s = (secs % 60).toString().padLeft(2, '0');
+              final sc = controller.score.value;
+
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                      'time_score'.trParams({'elapsed': '$m:$s', 'score': '$sc'}),
+                      style: const TextStyle(color: Colors.white),
                     ),
-                  );
-                },
+                  ),
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final boardSize = math.min(constraints.maxWidth, constraints.maxHeight) - 24;
+                        final tileSize = boardSize / n;
+                        return Center(
+                          child: SizedBox(
+                            width: boardSize + 24,
+                            height: boardSize + 24,
+                            child: Column(
+                              children: [
+                                Row(
+                                  children: [
+                                    const SizedBox(width: 24, height: 24),
+                                    for (int c = 0; c < n; c++)
+                                      SizedBox(
+                                        width: tileSize,
+                                        child: Center(
+                                          child: Text(
+                                            '${controller.colCounts[c]}',
+                                            style: const TextStyle(fontSize: 12),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                for (int r = 0; r < n; r++)
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        width: 24,
+                                        height: tileSize,
+                                        child: Center(
+                                          child: Text(
+                                            '${controller.rowCounts[r]}',
+                                            style: const TextStyle(fontSize: 12),
+                                          ),
+                                        ),
+                                      ),
+                                      for (int c = 0; c < n; c++)
+                                        SizedBox(
+                                          width: tileSize,
+                                          height: tileSize,
+                                          child: _buildTile(r, c, controller.currentMatrix[r][c]),
+                                        ),
+                                    ],
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               );
             }),
           ),
