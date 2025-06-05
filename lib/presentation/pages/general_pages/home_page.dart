@@ -47,18 +47,18 @@ class HomePage extends StatelessWidget {
                   icon: Icons.play_arrow,
                   onTap: () => Navigator.pushNamed(context, '/prism'),
                 ),
-                _MenuButton(
-                  color: Colors.lightGreen,
-                  label: 'Iniciar jogo Tango',
-                  icon: Icons.play_arrow,
-                  onTap: () => Navigator.pushNamed(context, '/tango'),
-                ),
-                _MenuButton(
-                  color: Colors.tealAccent,
-                  label: 'Iniciar jogo Nonogram',
-                  icon: Icons.play_arrow,
-                  onTap: () => Navigator.pushNamed(context, '/nonogram'),
-                ),
+                // _MenuButton(
+                //   color: Colors.lightGreen,
+                //   label: 'Iniciar jogo Tango',
+                //   icon: Icons.play_arrow,
+                //   onTap: () => Navigator.pushNamed(context, '/tango'),
+                // ),
+                // _MenuButton(
+                //   color: Colors.tealAccent,
+                //   label: 'Iniciar jogo Nonogram',
+                //   icon: Icons.play_arrow,
+                //   onTap: () => Navigator.pushNamed(context, '/nonogram'),
+                // ),
                 _MenuButton(
                   color: Colors.purpleAccent,
                   label: 'Iniciar modo completo',
