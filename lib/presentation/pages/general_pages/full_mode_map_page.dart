@@ -22,11 +22,91 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
   List<int> _completed = [];
   late final List<Offset> _relativePoints;
   String? _nextMapId;
+  String? _bgAsset;
+  String? _btnAsset;
+
+  String get _bgPath {
+    if (_bgAsset == null) return 'assets/images/ui/bg_gradient.png';
+    return _bgAsset!.contains('/')
+        ? _bgAsset!
+        : 'assets/images/ui/bgs/$_bgAsset';
+  }
+
+  String? get _btnPath {
+    if (_btnAsset == null) return null;
+    return _btnAsset!.contains('/')
+        ? _btnAsset!
+        : 'assets/images/ui/buttons/$_btnAsset';
+  }
+
+  Widget _phaseButton(BuildContext context, int i, int phaseCount) {
+    final onTap = i < phaseCount ? () => _openPhase(context, i) : null;
+    final completed = _completed.contains(i);
+    final btnPath = _btnPath;
+    if (btnPath != null) {
+      return GestureDetector(
+        onTap: onTap,
+        child: Stack(
+          children: [
+            Image.asset(btnPath, width: 60, height: 60),
+            Positioned.fill(
+              child: Center(
+                child: Text(
+                  '${i + 1}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            if (completed)
+              Positioned(
+                bottom: 4,
+                right: 4,
+                child: CircleAvatar(
+                  radius: 10,
+                  backgroundColor: Colors.green,
+                  child: const Icon(Icons.check,
+                      size: 12, color: Colors.white),
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+    return Stack(
+      children: [
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blueAccent,
+            shape: const CircleBorder(),
+            padding: const EdgeInsets.all(20),
+          ),
+          onPressed: onTap,
+          child: Text('${i + 1}'),
+        ),
+        if (completed)
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: CircleAvatar(
+              radius: 10,
+              backgroundColor: Colors.green,
+              child:
+                  const Icon(Icons.check, size: 12, color: Colors.white),
+            ),
+          ),
+      ],
+    );
+  }
 
   @override
   void initState() {
     super.initState();
     _loadCompleted();
+    _loadMapAssets();
     _generatePoints();
     _checkNextMap();
   }
@@ -59,6 +139,22 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
               (p.dy + rnd.nextDouble() * 0.1 - 0.05).clamp(0.05, 0.95),
             ))
         .toList();
+  }
+
+  Future<void> _loadMapAssets() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('maps')
+        .doc(widget.mapId)
+        .get();
+    if (doc.exists) {
+      final data = doc.data();
+      if (data != null) {
+        setState(() {
+          _bgAsset = data['bg'] as String?;
+          _btnAsset = data['btn'] as String?;
+        });
+      }
+    }
   }
 
   Future<void> _checkNextMap() async {
@@ -159,9 +255,9 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
         ),
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/ui/bg_gradient.png'),
+            image: AssetImage(_bgPath),
             fit: BoxFit.cover,
           ),
         ),
@@ -204,32 +300,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
                       Positioned(
                         left: points[i].dx - 30,
                         top: points[i].dy - 30,
-                        child: Stack(
-                          children: [
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueAccent,
-                                shape: const CircleBorder(),
-                                padding: const EdgeInsets.all(20),
-                              ),
-                              onPressed: i < phaseCount
-                                  ? () => _openPhase(context, i)
-                                  : null,
-                              child: Text('${i + 1}'),
-                            ),
-                            if (_completed.contains(i))
-                              Positioned(
-                                bottom: 4,
-                                right: 4,
-                                child: CircleAvatar(
-                                  radius: 10,
-                                  backgroundColor: Colors.green,
-                                  child: const Icon(Icons.check,
-                                      size: 12, color: Colors.white),
-                                ),
-                            ),
-                          ],
-                        ),
+                        child: _phaseButton(context, i, phaseCount),
                       ),
                     if (nextPoint != null)
                       Positioned(
