@@ -2,6 +2,8 @@
 
 import 'dart:math';
 
+import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,78 +33,6 @@ class TangoBoardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
-    // Se quiser testar sem parâmetros externos, pode inicializar aqui:
-    initBoard(
-      6,
-      [
-        [1, 0, 2, 0, 0, 0],
-        [1, 0, 1, 0, 0, 0],
-        [2, 0, 0, 1, 0, 0],
-        [2, 0, 0, 1, 0, 0],
-        [0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0],
-      ],
-      [
-        [1, 1, 2, 2, 1, 2],
-        [1, 2, 1, 2, 1, 2],
-        [2, 1, 2, 1, 2, 1],
-        [2, 2, 1, 1, 2, 1],
-        [1, 1, 2, 2, 1, 2],
-        [2, 2, 1, 1, 2, 1],
-      ],
-    );
-
-  //   initBoard(6, 
-  //     // Puzzle 4
-  // [
-  //   [1, 0, 1, 1, 0, 0],
-  //   [2, 0, 0, 2, 0, 2],
-  //   [1, 0, 0, 0, 2, 1],
-  //   [1, 0, 1, 0, 1, 2],
-  //   [2, 0, 2, 1, 0, 1],
-  //   [2, 0, 0, 0, 0, 0],
-  // ],
-  //   // Puzzle 4
-  // [
-  //   [1, 2, 1, 1, 2, 2],
-  //   [2, 1, 2, 2, 1, 2],
-  //   [1, 1, 2, 1, 2, 1],
-  //   [1, 2, 1, 2, 1, 2],
-  //   [2, 1, 2, 1, 2, 1],
-  //   [2, 2, 1, 2, 1, 1],
-  // ], 
-    
-  //   );
-
-  //     initBoard(9, 
-  //     // Puzzle 4
-  // [
-  //   [1, 0, 1, 1, 0, 0, 0, 0, 0],
-  //   [2, 0, 0, 2, 0, 2, 0, 0, 0],
-  //   [1, 0, 0, 0, 2, 1, 0, 0, 0],
-  //   [1, 0, 1, 0, 1, 2, 0, 0, 0],
-  //   [2, 0, 2, 1, 0, 1, 0, 0, 0],
-  //   [2, 0, 0, 0, 0, 0, 1, 1, 1],
-  //   [0, 0, 0, 0, 0, 0, 2, 2, 2],
-  //   [0, 0, 0, 0, 0, 0, 1, 1, 1],
-  //   [0, 0, 0, 0, 0, 0, 2, 2, 2],
-  // ],
-  //   // Puzzle 4
-  // [
-  //   [1, 1, 1, 1, 1, 1, 1, 1, 1],
-  //   [2, 2, 2, 2, 2, 2, 2, 2, 2],
-  //   [1, 2, 2, 2, 2, 1, 1, 1, 2],
-  //   [1, 1, 1, 0, 1, 2, 0, 0, 0],
-  //   [2, 1, 2, 1, 0, 1, 0, 0, 0],
-  //   [2, 1, 0, 0, 0, 0, 1, 1, 1],
-  //   [0, 1, 0, 3, 0, 0, 2, 2, 2],
-  //   [0, 1, 0, 2, 0, 0, 1, 1, 1],
-  //   [0, 1, 1, 1, 0, 0, 2, 2, 2],
-  // ], 
-    
-  //   );
-    resetBoard();
 
   }
 
@@ -291,6 +221,35 @@ void resetBoard() {
     isLoading.value = false;
 }
 
+  Future<void> loadPhase(String mapId, int index) async {
+    isLoading.value = true;
+    try {
+      final phases = await FirebaseFirestore.instance
+          .collection('maps')
+          .doc(mapId)
+          .collection('phases')
+          .orderBy('createdAt')
+          .limit(index + 1)
+          .get();
+      if (phases.docs.length <= index) {
+        isLoading.value = false;
+        Get.snackbar('Erro', 'Fase nao implementada',
+            snackPosition: SnackPosition.BOTTOM);
+        return;
+      }
+
+      final data = phases.docs[index].data();
+      final board = Map<String, dynamic>.from(data['board'] as Map);
+      final n = board['size'] as int;
+      final initial = stringParaMatriz(board['initial']);
+      final solution = stringParaMatriz(board['solution']);
+      initBoard(n, initial, solution);
+      resetBoard();
+    } catch (_) {
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
 }
 
@@ -317,3 +276,10 @@ class Hint {
     this.hidden = true,
   });
 }
+List<List<int>> stringParaMatriz(String s) {
+  final listaDinamica = jsonDecode(s) as List<dynamic>;
+  return listaDinamica
+      .map((linha) => List<int>.from(linha as List<dynamic>))
+      .toList();
+}
+
