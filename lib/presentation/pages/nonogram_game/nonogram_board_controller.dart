@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/progress_storage.dart';
 import '../../../core/life_manager.dart';
+import '../../../core/sfx.dart';
 
 /// Controller for the Nonogram puzzle board.
 ///
@@ -69,6 +70,7 @@ class NonogramBoardController extends GetxController {
   }
 
   void _handleLoss() {
+    Sfx().fail();
     _stopTimer();
     LifeManager().loseLife();
     Get.dialog(
@@ -147,12 +149,14 @@ class NonogramBoardController extends GetxController {
 
   void toggleTile(int row, int col) {
     isLoading.value = true;
+    Sfx().tap();
     final newVal = currentMatrix[row][col] == 1 ? 0 : 1;
     currentMatrix[row][col] = newVal;
     currentMatrix.refresh();
     clicks.value++;
     _updateScore();
     if (_checkCompletion()) {
+      Sfx().win();
       _stopTimer();
       if (currentMapId != null && currentPhaseIndex != null) {
         ProgressStorage.getInstance().then(

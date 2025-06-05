@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/life_manager.dart';
+import '../../../core/sfx.dart';
 import 'tango_board_controller.dart';
 
 class TangoBoardPage extends GetView<TangoBoardController> {
@@ -55,6 +56,7 @@ class TangoBoardPage extends GetView<TangoBoardController> {
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: () {
               controller.resetBoard();
+              Sfx().tap();
             },
             tooltip: 'restart'.tr,
           ),
@@ -86,6 +88,7 @@ class TangoBoardPage extends GetView<TangoBoardController> {
                       onPressed: remaining > 0
                           ? () {
                               controller.revealHint();
+                              Sfx().tap();
                             }
                           : null, // desabilita se não há mais dicas
                     ),

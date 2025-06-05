@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/progress_storage.dart';
 import '../../../core/life_manager.dart';
+import '../../../core/sfx.dart';
 
 class TangoBoardController extends GetxController {
   /// Dimensão do tabuleiro (NxN)
@@ -70,6 +71,7 @@ class TangoBoardController extends GetxController {
   }
 
   void _handleLoss() {
+    Sfx().fail();
     if (_timer != null) {
       _stopTimer();
     }
@@ -200,6 +202,7 @@ class TangoBoardController extends GetxController {
   /// Se não houver mais dicas para revelar, não faz nada.
   void revealHint() {
     isLoading.value = true;
+    Sfx().tap();
     // Filtra apenas as dicas que ainda estão ocultas
     final ocultas = hints.where((h) => h.hidden).toList();
     if (ocultas.isEmpty) return;
@@ -230,6 +233,7 @@ class TangoBoardController extends GetxController {
   /// Cicla o estado de uma célula: 0 -> 1 -> 2 -> 0
   void cycleTile(int row, int col) {
     isLoading.value = true;
+    Sfx().tap();
     // 1) Se veio pré-preenchido, bloqueia alteração
     if (initialMatrix[row][col] != 0) return;
 
@@ -248,6 +252,7 @@ class TangoBoardController extends GetxController {
 
     // 5) Se terminado, exibe o diálogo
     if (_checkCompletion()) {
+      Sfx().win();
       _stopTimer();
       if (currentMapId != null && currentPhaseIndex != null) {
         ProgressStorage.getInstance().then(

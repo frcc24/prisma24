@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/life_manager.dart';
+import '../../../core/sfx.dart';
 import 'nonogram_board_controller.dart';
 
 class NonogramBoard extends GetView<NonogramBoardController> {
@@ -50,7 +51,10 @@ class NonogramBoard extends GetView<NonogramBoardController> {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'restart'.tr,
-            onPressed: controller.resetBoard,
+            onPressed: () {
+              controller.resetBoard();
+              Sfx().tap();
+            },
           ),
         ],
       ),
