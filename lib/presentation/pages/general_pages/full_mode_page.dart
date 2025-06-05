@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'full_mode_map_page.dart';
 
@@ -26,7 +27,7 @@ class FullModePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Escolha o mapa'),
+        title: Text('choose_map'.tr),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _maps(),
@@ -36,7 +37,7 @@ class FullModePage extends StatelessWidget {
           }
           final maps = snap.data!;
           if (maps.isEmpty) {
-            return const Center(child: Text('Nenhum mapa disponível'));
+            return Center(child: Text('no_maps'.tr));
           }
           return ListView.builder(
             itemCount: maps.length,
@@ -48,7 +49,7 @@ class FullModePage extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ListTile(
-                  title: Text('Mapa ${i + 1}'),
+                  title: Text('map'.trArgs(['${i + 1}'])),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

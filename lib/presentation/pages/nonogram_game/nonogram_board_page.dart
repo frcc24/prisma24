@@ -11,16 +11,16 @@ class NonogramBoard extends GetView<NonogramBoardController> {
     final res = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Sair da fase?'),
-        content: const Text('Você perderá uma vida se sair agora.'),
+        title: Text('exit_stage_q'.tr),
+        content: Text('lose_life_msg'.tr),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text('cancel'.tr),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Sair'),
+            child: Text('exit'.tr),
           ),
         ],
       ),
@@ -44,11 +44,11 @@ class NonogramBoard extends GetView<NonogramBoardController> {
       },
       child: Scaffold(
       appBar: AppBar(
-        title: const Text('Nonogram'),
+        title: Text('nonogram'.tr),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'Reiniciar',
+            tooltip: 'restart'.tr,
             onPressed: controller.resetBoard,
           ),
         ],

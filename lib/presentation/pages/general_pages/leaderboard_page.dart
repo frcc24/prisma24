@@ -1,6 +1,7 @@
 // lib/presentation/pages/leaderboard_page.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 
 /// Página que exibe o TOP-100 de pontuações, em tempo real, via Firestore.
 class LeaderboardPage extends StatelessWidget {
@@ -18,7 +19,7 @@ class LeaderboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Top 100 Jogadores'),
+        title: Text('top100'.tr),
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: _top100Stream(),
@@ -31,7 +32,7 @@ class LeaderboardPage extends StatelessWidget {
           }
           final docs = snap.data!.docs;
           if (docs.isEmpty) {
-            return const Center(child: Text('Nenhuma pontuação ainda.'));
+            return Center(child: Text('no_scores'.tr));
           }
 
           return ListView.separated(

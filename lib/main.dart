@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'app_translations.dart';
 import 'presentation/pages/general_pages/home_page.dart';
 import 'presentation/pages/prism_game/game_page.dart';
 import 'firebase_options.dart';
@@ -28,11 +30,17 @@ void main() async {
 
   await LifeManager().init();
 
-  runApp(const ProviderScope(child: Prisma24App()));
+  final prefs = await SharedPreferences.getInstance();
+  final code = prefs.getString('locale') ?? 'pt_BR';
+  final parts = code.split('_');
+  final locale = Locale(parts[0], parts.length > 1 ? parts[1] : '');
+
+  runApp(ProviderScope(child: Prisma24App(initialLocale: locale)));
 }
 
 class Prisma24App extends StatelessWidget {
-  const Prisma24App({super.key});
+  final Locale initialLocale;
+  const Prisma24App({super.key, required this.initialLocale});
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +51,9 @@ class Prisma24App extends StatelessWidget {
     return GetMaterialApp(
       title: 'Prisma 24',
       debugShowCheckedModeBanner: false,
+      translations: AppTranslations(),
+      locale: initialLocale,
+      fallbackLocale: const Locale('en', 'US'),
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 import '../../../core/progress_storage.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -16,10 +17,12 @@ class _SettingsPageState extends State<SettingsPage> {
   /* chaves no SharedPreferences */
   static const _kSoundKey = 'sound_on';
   static const _kNameKey  = 'player_name';
+  static const _kLocaleKey = 'locale';
 
   bool _soundOn = true;
   String _playerName = 'Jogador';
   String _version = '';
+  Locale _locale = const Locale('pt', 'BR');
 
   /* carregamento inicial */
   @override
@@ -35,6 +38,9 @@ class _SettingsPageState extends State<SettingsPage> {
       _soundOn     = prefs.getBool(_kSoundKey) ?? true;
       _playerName  = prefs.getString(_kNameKey) ?? 'Jogador';
       _version     = '${pkg.version}+${pkg.buildNumber}';
+      final code = prefs.getString(_kLocaleKey) ?? 'pt_BR';
+      final parts = code.split('_');
+      _locale = Locale(parts[0], parts.length > 1 ? parts[1] : '');
     });
   }
 
@@ -57,17 +63,17 @@ class _SettingsPageState extends State<SettingsPage> {
     final result = await showDialog<String>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Alterar nome'),
+        title: Text('change_name'.tr),
         content: TextField(
           controller: controller,
           maxLength: 24,
-          decoration: const InputDecoration(hintText: 'Seu nome no ranking'),
+          decoration: InputDecoration(hintText: 'player_name'.tr),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text('cancel'.tr)),
           ElevatedButton(
               onPressed: () => Navigator.pop(context, controller.text.trim()),
-              child: const Text('Salvar')),
+              child: Text('save'.tr)),
         ],
       ),
     );
@@ -79,16 +85,47 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<void> _changeLanguage() async {
+    final result = await showDialog<Locale>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('select_language'.tr),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            RadioListTile<Locale>(
+              title: Text('english'.tr),
+              value: const Locale('en', 'US'),
+              groupValue: _locale,
+              onChanged: (v) => Navigator.pop(context, v),
+            ),
+            RadioListTile<Locale>(
+              title: Text('portuguese'.tr),
+              value: const Locale('pt', 'BR'),
+              groupValue: _locale,
+              onChanged: (v) => Navigator.pop(context, v),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (result != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_kLocaleKey, '${result.languageCode}_${result.countryCode}');
+      setState(() => _locale = result);
+      Get.updateLocale(result);
+    }
+  }
+
   Future<void> _resetProgress() async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Resetar progresso?'),
-        content: const Text(
-            'Fases concluídas serão removidas e você terá que jogar tudo novamente.'),
+        title: Text('reset_progress_q'.tr),
+        content: Text('reset_progress_msg'.tr),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Confirmar')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text('cancel'.tr)),
+          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: Text('confirm'.tr)),
         ],
       ),
     );
@@ -96,7 +133,7 @@ class _SettingsPageState extends State<SettingsPage> {
       final storage = await ProgressStorage.getInstance();
       await storage.reset();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Progresso apagado')),
+        SnackBar(content: Text('progress_cleared'.tr)),
       );
     }
   }
@@ -104,37 +141,43 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Configurações')),
+      appBar: AppBar(title: Text('settings'.tr)),
       body: ListView(
         children: [
           SwitchListTile(
             value: _soundOn,
-            title: const Text('Som'),
-            subtitle: const Text('Ativar efeitos de áudio'),
+            title: Text('sound'.tr),
+            subtitle: Text('enable_audio'.tr),
             onChanged: _toggleSound,
           ),
           ListTile(
-            title: const Text('Nome no placar'),
+            title: Text('player_name'.tr),
             subtitle: Text(_playerName),
             trailing: const Icon(Icons.edit),
             onTap: _editName,
           ),
           ListTile(
-            title: const Text('Versão do app'),
+            title: Text('app_version'.tr),
             subtitle: Text(_version.isEmpty ? '...' : _version),
           ),
           const Divider(),
           ListTile(
-            title: const Text('Resetar fases'),
+            title: Text('reset_phases'.tr),
             subtitle: const Text('Apagar progresso salvo'),
             trailing: const Icon(Icons.restore),
             onTap: _resetProgress,
           ),
           const Divider(),
           ListTile(
-            title: const Text('Licenças de código aberto'),
+            title: Text('open_source_licenses'.tr),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () => showLicensePage(context: context, applicationName: 'Prisma 24'),
+          ),
+          ListTile(
+            title: Text('select_language'.tr),
+            subtitle: Text(_locale.languageCode == 'pt' ? 'portuguese'.tr : 'english'.tr),
+            trailing: const Icon(Icons.language),
+            onTap: _changeLanguage,
           ),
         ],
       ),
