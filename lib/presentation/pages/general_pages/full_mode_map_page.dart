@@ -102,6 +102,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
     if (btnPath != null) {
       button = Material(
         elevation: 1,
+        shadowColor: Colors.black54,
         shape: const CircleBorder(),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -124,6 +125,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
     } else {
       button = Material(
         elevation: 2,
+        shadowColor: Colors.black54,
         shape: const CircleBorder(),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -367,6 +369,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
                         top: nextPoint.dy - 30,
                         child: Material(
                           elevation: 4,
+                          shadowColor: Colors.black54,
                           shape: const CircleBorder(),
                           clipBehavior: Clip.antiAlias,
                           child: InkWell(
