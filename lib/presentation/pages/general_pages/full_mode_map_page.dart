@@ -101,8 +101,9 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
     Widget button;
     if (btnPath != null) {
       button = Material(
+        color: Colors.transparent,
         elevation: 1,
-        shadowColor: Colors.black54,
+        shadowColor: Colors.black87,
         shape: const CircleBorder(),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -124,6 +125,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
       );
     } else {
       button = Material(
+        color: Colors.transparent,
         elevation: 2,
         shadowColor: Colors.black54,
         shape: const CircleBorder(),
@@ -368,8 +370,9 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
                         left: nextPoint.dx - 30,
                         top: nextPoint.dy - 30,
                         child: Material(
+                          color: Colors.transparent,
                           elevation: 4,
-                          shadowColor: Colors.black54,
+                          shadowColor: Colors.black87,
                           shape: const CircleBorder(),
                           clipBehavior: Clip.antiAlias,
                           child: InkWell(
