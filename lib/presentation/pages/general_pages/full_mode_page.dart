@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/progress_storage.dart';
 import 'full_mode_map_page.dart';
 
 class FullModePage extends StatelessWidget {
@@ -12,7 +13,8 @@ class FullModePage extends StatelessWidget {
         .collection('maps')
         .orderBy('createdAt')
         .get();
-    return snap.docs.map((d) {
+    final storage = await ProgressStorage.getInstance();
+    final maps = snap.docs.map((d) {
       final data = d.data();
       return {
         'id': d.id,
@@ -21,6 +23,18 @@ class FullModePage extends StatelessWidget {
         'bg': data['bg'] ?? '',
       };
     }).toList();
+
+    for (int i = 0; i < maps.length; i++) {
+      final id = maps[i]['id'] as String;
+      bool unlocked = i == 0 || storage.isMapUnlocked(id);
+      if (!unlocked && i > 0) {
+        final prevId = maps[i - 1]['id'] as String;
+        final completed = storage.getCompleted(prevId).length;
+        unlocked = completed >= 8;
+      }
+      maps[i]['unlocked'] = unlocked;
+    }
+    return maps;
   }
 
   @override
@@ -51,6 +65,7 @@ class FullModePage extends StatelessWidget {
             itemBuilder: (context, i) {
               final map = maps[i];
               final id = map['id'] as String;
+              final unlocked = map['unlocked'] as bool? ?? false;
               final date = map['createdAt'] as DateTime?;
               final message = map['message'] as String?;
               final theme = map['bg'] as String? ?? '';
@@ -95,14 +110,30 @@ class FullModePage extends StatelessWidget {
                         ],
                       ),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => FullModeMapPage(mapId: id),
-                          settings: const RouteSettings(name: '/full_map'),
+                      onTap: () {
+                        if (!unlocked) {
+                          Get.snackbar('Ops', 'complete_prev_map'.tr,
+                              snackPosition: SnackPosition.BOTTOM);
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => FullModeMapPage(mapId: id),
+                              settings: const RouteSettings(name: '/full_map'),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                    if (!unlocked)
+                      Positioned.fill(
+                        child: Container(
+                          color: Colors.black54.withOpacity(0.6),
+                          alignment: Alignment.center,
+                          child:
+                              const Icon(Icons.lock, color: Colors.white, size: 48),
                         ),
                       ),
-                    ),
                   ],
                 ),
               );
