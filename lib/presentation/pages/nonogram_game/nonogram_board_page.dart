@@ -92,10 +92,7 @@ class NonogramBoard extends GetView<NonogramBoardController> {
                 children: [
                   const SizedBox(height: 16),
                   Obx(() {
-                    final remaining = controller.revealedMatrix
-                        .expand((r) => r)
-                        .where((e) => !e)
-                        .length;
+                    final remaining = controller.hintsRemaining;
                     return Stack(
                       alignment: Alignment.center,
                       children: [

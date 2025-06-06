@@ -106,6 +106,19 @@ class NonogramBoardController extends GetxController {
   final RxList<List<bool>> revealedMatrix = <List<bool>>[].obs;
   final RxList<List<bool>> hintMatrix = <List<bool>>[].obs;
 
+  int get hintsRemaining {
+    int count = 0;
+    for (int i = 0; i < size.value; i++) {
+      for (int j = 0; j < size.value; j++) {
+        if (!revealedMatrix[i][j] &&
+            currentMatrix[i][j] != solutionMatrix[i][j]) {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -272,12 +285,14 @@ class NonogramBoardController extends GetxController {
     final List<List<int>> available = [];
     for (int i = 0; i < size.value; i++) {
       for (int j = 0; j < size.value; j++) {
-        if (!revealedMatrix[i][j] && currentMatrix[i][j] == 0) {
+        if (!revealedMatrix[i][j] &&
+            currentMatrix[i][j] != solutionMatrix[i][j]) {
           available.add([i, j]);
         }
       }
     }
-    if (available.isNotEmpty) {
+    final maxHints = size.value * size.value;
+    if (available.isNotEmpty && hintsUsed.value < maxHints) {
       final choice = available[_random.nextInt(available.length)];
       final r = choice[0];
       final c = choice[1];
