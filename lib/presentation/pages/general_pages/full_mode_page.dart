@@ -178,7 +178,7 @@ class _FullModePageState extends State<FullModePage> {
                 );
               },
               ),
-            ];
+            ],);
           },
         ),
       ),
