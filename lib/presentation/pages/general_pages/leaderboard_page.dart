@@ -18,6 +18,24 @@ class LeaderboardPage extends StatelessWidget {
           .limit(5)
           .snapshots();
 
+  Stream<QuerySnapshot<Map<String, dynamic>>> _phases(String mapId) =>
+      FirebaseFirestore.instance
+          .collection('maps')
+          .doc(mapId)
+          .collection('phases')
+          .orderBy('createdAt')
+          .snapshots();
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> _phaseLeaders(
+          String mapId, int phase) =>
+      FirebaseFirestore.instance
+          .collection('phase_scores')
+          .where('mapId', isEqualTo: mapId)
+          .where('phase', isEqualTo: phase)
+          .orderBy('score', descending: true)
+          .limit(5)
+          .snapshots();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,6 +70,38 @@ class LeaderboardPage extends StatelessWidget {
                             title: Text(docs[i]['name']),
                             trailing: Text('${docs[i]['score']}'),
                           ),
+                        StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                          stream: _phases(m.id),
+                          builder: (context, phaseSnap) {
+                            final phases = phaseSnap.data?.docs ?? [];
+                            return Column(
+                              children: [
+                                for (int p = 0; p < phases.length; p++)
+                                  StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                                    stream: _phaseLeaders(m.id, p),
+                                    builder: (context, phaseScoreSnap) {
+                                      final pDocs = phaseScoreSnap.data?.docs ?? [];
+                                      final pf = pDocs.isNotEmpty ? pDocs.first.data() : null;
+                                      return ExpansionTile(
+                                        title: Text('phase'.trArgs(['${p + 1}'])),
+                                        subtitle: pf != null
+                                            ? Text('${pf['name']} - ${pf['score']}')
+                                            : Text('no_scores'.tr),
+                                        children: [
+                                          for (int j = 1; j < pDocs.length; j++)
+                                            ListTile(
+                                              leading: Text('#${j + 1}'),
+                                              title: Text(pDocs[j]['name']),
+                                              trailing: Text('${pDocs[j]['score']}'),
+                                            ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
                       ],
                     );
                   },
