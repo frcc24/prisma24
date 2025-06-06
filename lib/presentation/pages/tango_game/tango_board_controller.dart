@@ -48,6 +48,7 @@ class TangoBoardController extends GetxController {
 
   String? currentMapId;
   int? currentPhaseIndex;
+  int leaderboardCutoff = 0;
 
   void _startTimer() {
     _timer?.cancel();
@@ -262,8 +263,8 @@ class TangoBoardController extends GetxController {
       if (currentMapId != null && currentPhaseIndex != null) {
         ProgressStorage.getInstance().then(
             (p) => p.addCompletion(currentMapId!, currentPhaseIndex!));
-        LeaderboardService()
-            .savePhaseScore(currentMapId!, currentPhaseIndex!, score.value);
+        LeaderboardService().maybeSavePhaseScore(
+            currentMapId!, currentPhaseIndex!, score.value, leaderboardCutoff);
       }
       Get.dialog(
         AlertDialog(
@@ -314,6 +315,7 @@ void resetBoard() {
     isLoading.value = true;
     currentMapId = mapId;
     currentPhaseIndex = index;
+    leaderboardCutoff = await LeaderboardService().getMinScore(mapId, index);
     try {
       final data = await _repo.fetchPhase(mapId, index);
       if (data == null) {

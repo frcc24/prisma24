@@ -10,9 +10,6 @@ class LeaderboardPage extends StatelessWidget {
   Stream<QuerySnapshot<Map<String, dynamic>>> _maps() =>
       MapRepository().streamMaps();
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> _leaders(String mapId) =>
-      ScoreRepository().mapLeaders(mapId);
-
   Stream<QuerySnapshot<Map<String, dynamic>>> _phases(String mapId) =>
       MapRepository().streamMapPhases(mapId);
 
@@ -35,89 +32,99 @@ class LeaderboardPage extends StatelessWidget {
             return Center(child: Text('no_maps'.tr));
           }
           return ListView(
+            padding: const EdgeInsets.all(8),
             children: [
               for (final m in maps)
-                StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                  stream: _leaders(m.id),
-                  builder: (context, snap2) {
-                    if (snap2.connectionState == ConnectionState.waiting) {
-                      return ListTile(
-                        title: Text(m.id),
-                        subtitle: const LinearProgressIndicator(),
-                      );
-                    }
-                    if (snap2.hasError) {
-                      return ListTile(
-                        title: Text(m.id),
-                        subtitle: Text('error_loading'.tr),
-                      );
-                    }
-                    final docs = snap2.data?.docs ?? [];
-                    final first = docs.isNotEmpty ? docs.first.data() : null;
-                    return ExpansionTile(
-                      title: Text(m.id),
-                      subtitle: first != null
-                          ? Text('${first['name']} - ${first['score']}')
-                          : Text('no_scores'.tr),
-                      children: [
-                        for (int i = 1; i < docs.length; i++)
-                          ListTile(
-                            leading: Text('#${i + 1}'),
-                            title: Text(docs[i]['name']),
-                            trailing: Text('${docs[i]['score']}'),
-                          ),
-                        StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                          stream: _phases(m.id),
-                          builder: (context, phaseSnap) {
-                            if (phaseSnap.connectionState == ConnectionState.waiting) {
-                              return const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: LinearProgressIndicator(),
-                              );
-                            }
-                            final phases = phaseSnap.data?.docs ?? [];
-                            return Column(
-                              children: [
-                                for (int p = 0; p < phases.length; p++)
-                                  StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-                                    stream: _phaseLeaders(m.id, p),
-                                    builder: (context, phaseScoreSnap) {
-                                      if (phaseScoreSnap.connectionState == ConnectionState.waiting) {
-                                        return const Padding(
-                                          padding: EdgeInsets.symmetric(vertical: 8.0),
-                                          child: LinearProgressIndicator(),
-                                        );
-                                      }
-                                      final pDocs = phaseScoreSnap.data?.docs ?? [];
-                                      final pf = pDocs.isNotEmpty ? pDocs.first.data() : null;
-                                      return ExpansionTile(
-                                        title: Text('phase'.trArgs(['${p + 1}'])),
-                                        subtitle: pf != null
-                                            ? Text('${pf['name']} - ${pf['score']}')
-                                            : Text('no_scores'.tr),
-                                        children: [
-                                          for (int j = 1; j < pDocs.length; j++)
-                                            ListTile(
-                                              leading: Text('#${j + 1}'),
-                                              title: Text(pDocs[j]['name']),
-                                              trailing: Text('${pDocs[j]['score']}'),
-                                            ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                              ],
-                            );
-                          },
+                Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  clipBehavior: Clip.antiAlias,
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: Image.asset(
+                          _bgPath(m['bg'] as String?),
+                          fit: BoxFit.cover,
                         ),
-                      ],
-                    );
-                  },
+                      ),
+                      Positioned.fill(
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Colors.transparent, Colors.black54],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Theme(
+                        data: Theme.of(context).copyWith(
+                            dividerColor: Colors.transparent,
+                            textTheme: const TextTheme(
+                                bodyMedium: TextStyle(color: Colors.white))),
+                        child: ExpansionTile(
+                          title: Text(m.id),
+                          children: [
+                            StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                              stream: _phases(m.id),
+                              builder: (context, phaseSnap) {
+                                if (phaseSnap.connectionState == ConnectionState.waiting) {
+                                  return const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: LinearProgressIndicator(),
+                                  );
+                                }
+                                final phases = phaseSnap.data?.docs ?? [];
+                                return Column(
+                                  children: [
+                                    for (int p = 0; p < phases.length; p++)
+                                      StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                                        stream: _phaseLeaders(m.id, p),
+                                        builder: (context, scoreSnap) {
+                                          if (scoreSnap.connectionState == ConnectionState.waiting) {
+                                            return const Padding(
+                                              padding: EdgeInsets.symmetric(vertical: 8.0),
+                                              child: LinearProgressIndicator(),
+                                            );
+                                          }
+                                          final docs = scoreSnap.data?.docs ?? [];
+                                          return ExpansionTile(
+                                            title: Text('phase'.trArgs(['${p + 1}'])),
+                                            children: [
+                                              for (int i = 0; i < docs.length; i++)
+                                                ListTile(
+                                                  leading: Text('#${i + 1}'),
+                                                  title: Text(docs[i]['name']),
+                                                  trailing: Text('${docs[i]['score']}'),
+                                                ),
+                                              if (docs.isEmpty)
+                                                Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: Text('no_scores'.tr),
+                                                ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
             ],
           );
         },
       ),
     );
+  }
+
+  String _bgPath(String? theme) {
+    if (theme == null || theme.isEmpty) return 'assets/images/ui/bg_gradient.png';
+    return theme.contains('/') ? theme : 'assets/images/ui/bgs/$theme';
   }
 }

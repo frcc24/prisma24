@@ -6,12 +6,21 @@ class ScoreRepository {
 
   final FirebaseFirestore _firestore;
 
-  Future<void> savePrismScore(String name, int score) {
-    return _firestore.collection('scores').add({
-      'name': name,
-      'score': score,
-      'ts': FieldValue.serverTimestamp(),
-    });
+  CollectionReference<Map<String, dynamic>> _phaseCollection(
+      String mapId, int phaseIndex) {
+    return _firestore
+        .collection('map_leaderboards')
+        .doc('map$mapId')
+        .collection('phase$phaseIndex');
+  }
+
+  Future<int> lowestTopScore(String mapId, int phaseIndex) async {
+    final query = await _phaseCollection(mapId, phaseIndex)
+        .orderBy('score', descending: true)
+        .limit(3)
+        .get();
+    if (query.docs.length < 3) return 0;
+    return query.docs.last['score'] as int;
   }
 
   Future<void> savePhaseScore(
@@ -20,54 +29,29 @@ class ScoreRepository {
     String name,
     int score,
   ) async {
-    final query = await _firestore
-        .collection('phase_scores')
-        .where('mapId', isEqualTo: mapId)
-        .where('phase', isEqualTo: phaseIndex)
-        .orderBy('score', descending: true)
-        .get();
-
+    final collection = _phaseCollection(mapId, phaseIndex);
+    final query = await collection.orderBy('score', descending: true).get();
     final docs = query.docs;
     final shouldSave =
-        docs.length < 5 || score > (docs.isNotEmpty ? docs.last['score'] as int : 0);
+        docs.length < 3 || score > (docs.isNotEmpty ? docs.last['score'] as int : 0);
 
     if (shouldSave) {
-      await _firestore.collection('phase_scores').add({
-        'mapId': mapId,
-        'phase': phaseIndex,
+      await collection.add({
         'name': name,
         'score': score,
         'ts': FieldValue.serverTimestamp(),
       });
 
-      if (docs.length >= 5) {
+      if (docs.length >= 3) {
         await docs.last.reference.delete();
       }
     }
   }
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> mapLeaders(String mapId) =>
-      _firestore
-          .collection('map_leaderboards')
-          .where('mapId', isEqualTo: mapId)
-          .orderBy('score', descending: true)
-          .limit(5)
-          .snapshots();
-
-  Future<void> updateMapTotal(String mapId, String name, int score) {
-    return _firestore
-        .collection('map_leaderboards')
-        .doc('$mapId-$name')
-        .set({'mapId': mapId, 'name': name, 'score': score, 'ts': FieldValue.serverTimestamp()});
-  }
-
   Stream<QuerySnapshot<Map<String, dynamic>>> phaseLeaders(
           String mapId, int phase) =>
-      _firestore
-          .collection('phase_scores')
-          .where('mapId', isEqualTo: mapId)
-          .where('phase', isEqualTo: phase)
+      _phaseCollection(mapId, phase)
           .orderBy('score', descending: true)
-          .limit(5)
+          .limit(3)
           .snapshots();
 }

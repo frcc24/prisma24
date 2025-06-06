@@ -1,14 +1,4 @@
 {
-  "indexes": [
-    {
-      "collectionGroup": "phase_scores",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {"fieldPath": "mapId", "order": "ASCENDING"},
-        {"fieldPath": "phase", "order": "ASCENDING"},
-        {"fieldPath": "score", "order": "DESCENDING"}
-      ]
-    }
-  ],
+  "indexes": [],
   "fieldOverrides": []
 }
