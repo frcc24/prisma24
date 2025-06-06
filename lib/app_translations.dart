@@ -71,6 +71,7 @@ class AppTranslations extends Translations {
       'complete_prev_map': 'Complete 80% of the previous map to unlock.',
       'unlock_map_q': 'Watch ad to unlock this map?',
       'unlocked': 'Map unlocked!',
+      'map_progress': '@pct% completed',
     },
     'pt_BR': {
       'start_prism': 'Iniciar jogo Prism',
@@ -140,6 +141,7 @@ class AppTranslations extends Translations {
       'complete_prev_map': 'Conclua 80% do mapa anterior para desbloquear.',
       'unlock_map_q': 'Assistir anúncio para desbloquear este mapa?',
       'unlocked': 'Mapa desbloqueado!',
+      'map_progress': '@pct% concluído',
     },
   };
 }

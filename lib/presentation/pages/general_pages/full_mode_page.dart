@@ -5,8 +5,14 @@ import 'package:get/get.dart';
 import '../../../core/progress_storage.dart';
 import 'full_mode_map_page.dart';
 
-class FullModePage extends StatelessWidget {
+class FullModePage extends StatefulWidget {
   const FullModePage({super.key});
+
+  @override
+  State<FullModePage> createState() => _FullModePageState();
+}
+
+class _FullModePageState extends State<FullModePage> {
 
   Future<List<Map<String, dynamic>>> _maps() async {
     final snap = await FirebaseFirestore.instance
@@ -14,25 +20,39 @@ class FullModePage extends StatelessWidget {
         .orderBy('createdAt')
         .get();
     final storage = await ProgressStorage.getInstance();
-    final maps = snap.docs.map((d) {
-      final data = d.data();
-      return {
-        'id': d.id,
-        'createdAt': (data['createdAt'] as Timestamp?)?.toDate(),
-        'message': data['message'] ?? '',
-        'bg': data['bg'] ?? '',
-      };
-    }).toList();
+    final maps = <Map<String, dynamic>>[];
 
-    for (int i = 0; i < maps.length; i++) {
-      final id = maps[i]['id'] as String;
+    for (int i = 0; i < snap.docs.length; i++) {
+      final d = snap.docs[i];
+      final data = d.data();
+      final id = d.id;
+
+      final phases = await FirebaseFirestore.instance
+          .collection('maps')
+          .doc(id)
+          .collection('phases')
+          .get();
+      final phaseCount = phases.size;
+      final completedCount = storage.getCompleted(id).length;
+      final percent = phaseCount == 0
+          ? 0
+          : ((completedCount / phaseCount) * 100).round();
+
       bool unlocked = i == 0 || storage.isMapUnlocked(id);
       if (!unlocked && i > 0) {
-        final prevId = maps[i - 1]['id'] as String;
+        final prevId = snap.docs[i - 1].id;
         final completed = storage.getCompleted(prevId).length;
         unlocked = completed >= 8;
       }
-      maps[i]['unlocked'] = unlocked;
+
+      maps.add({
+        'id': id,
+        'createdAt': (data['createdAt'] as Timestamp?)?.toDate(),
+        'message': data['message'] ?? '',
+        'bg': data['bg'] ?? '',
+        'unlocked': unlocked,
+        'percent': percent,
+      });
     }
     return maps;
   }
@@ -68,6 +88,7 @@ class FullModePage extends StatelessWidget {
               final unlocked = map['unlocked'] as bool? ?? false;
               final date = map['createdAt'] as DateTime?;
               final message = map['message'] as String?;
+              final percent = map['percent'] as int? ?? 0;
               final theme = map['bg'] as String? ?? '';
               final bgPath = theme.isNotEmpty
                   ? (theme.contains('/')
@@ -107,21 +128,23 @@ class FullModePage extends StatelessWidget {
                               : 'Sem data'),
                           if (message != null && message.isNotEmpty)
                             Text(message),
+                          Text('map_progress'.trParams({'pct': percent.toString()})),
                         ],
                       ),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () {
+                      onTap: () async {
                         if (!unlocked) {
                           Get.snackbar('Ops', 'complete_prev_map'.tr,
                               snackPosition: SnackPosition.BOTTOM);
                         } else {
-                          Navigator.push(
+                          await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) => FullModeMapPage(mapId: id),
                               settings: const RouteSettings(name: '/full_map'),
                             ),
                           );
+                          if (mounted) setState(() {});
                         }
                       },
                     ),
