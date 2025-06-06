@@ -56,6 +56,18 @@ class LeaderboardPage extends StatelessWidget {
                 StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                   stream: _leaders(m.id),
                   builder: (context, snap2) {
+                    if (snap2.connectionState == ConnectionState.waiting) {
+                      return ListTile(
+                        title: Text(m.id),
+                        subtitle: const LinearProgressIndicator(),
+                      );
+                    }
+                    if (snap2.hasError) {
+                      return ListTile(
+                        title: Text(m.id),
+                        subtitle: Text('error_loading'.tr),
+                      );
+                    }
                     final docs = snap2.data?.docs ?? [];
                     final first = docs.isNotEmpty ? docs.first.data() : null;
                     return ExpansionTile(
@@ -73,6 +85,12 @@ class LeaderboardPage extends StatelessWidget {
                         StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                           stream: _phases(m.id),
                           builder: (context, phaseSnap) {
+                            if (phaseSnap.connectionState == ConnectionState.waiting) {
+                              return const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: LinearProgressIndicator(),
+                              );
+                            }
                             final phases = phaseSnap.data?.docs ?? [];
                             return Column(
                               children: [
@@ -80,6 +98,12 @@ class LeaderboardPage extends StatelessWidget {
                                   StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                                     stream: _phaseLeaders(m.id, p),
                                     builder: (context, phaseScoreSnap) {
+                                      if (phaseScoreSnap.connectionState == ConnectionState.waiting) {
+                                        return const Padding(
+                                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                                          child: LinearProgressIndicator(),
+                                        );
+                                      }
                                       final pDocs = phaseScoreSnap.data?.docs ?? [];
                                       final pf = pDocs.isNotEmpty ? pDocs.first.data() : null;
                                       return ExpansionTile(
