@@ -1,1 +1,44 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"prisma24-812c8","appId":"1:1057866169030:android:6e1f4344bdd7a0660a35c7","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"prisma24-812c8","appId":"1:1057866169030:ios:0290b4a28ca009fd0a35c7","uploadDebugSymbols":false,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"macos":{"default":{"projectId":"prisma24-812c8","appId":"1:1057866169030:ios:0290b4a28ca009fd0a35c7","uploadDebugSymbols":false,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"prisma24-812c8","configurations":{"android":"1:1057866169030:android:6e1f4344bdd7a0660a35c7","ios":"1:1057866169030:ios:0290b4a28ca009fd0a35c7","macos":"1:1057866169030:ios:0290b4a28ca009fd0a35c7","web":"1:1057866169030:web:dca3108384b6bd1e0a35c7","windows":"1:1057866169030:web:d85440176fb5d8020a35c7"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "prisma24-812c8",
+          "appId": "1:1057866169030:android:6e1f4344bdd7a0660a35c7",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "prisma24-812c8",
+          "appId": "1:1057866169030:ios:0290b4a28ca009fd0a35c7",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "prisma24-812c8",
+          "appId": "1:1057866169030:ios:0290b4a28ca009fd0a35c7",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "prisma24-812c8",
+          "configurations": {
+            "android": "1:1057866169030:android:6e1f4344bdd7a0660a35c7",
+            "ios": "1:1057866169030:ios:0290b4a28ca009fd0a35c7",
+            "macos": "1:1057866169030:ios:0290b4a28ca009fd0a35c7",
+            "web": "1:1057866169030:web:dca3108384b6bd1e0a35c7",
+            "windows": "1:1057866169030:web:d85440176fb5d8020a35c7"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "indexes": "firestore.indexes.json"
+  }
+}
