@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import "../../../core/progress_storage.dart";
-import '../../controllers/full_mode_map_controller.dart';
+import '../../controllers/map_pages/full_mode_map_controller.dart';
 import '../../widgets/lives_bar.dart';
 import '../../widgets/phase_button.dart';
 import '../../widgets/outlined_icon.dart';

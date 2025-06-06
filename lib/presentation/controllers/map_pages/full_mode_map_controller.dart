@@ -3,11 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../core/life_manager.dart';
-import '../../core/progress_storage.dart';
-import '../pages/nonogram_game/nonogram_board_controller.dart';
-import '../pages/tango_game/tango_board_controller.dart';
-import '../widgets/loading_dialog.dart';
+import '../../../core/life_manager.dart';
+import '../../../core/progress_storage.dart';
+import '../../pages/nonogram_game/nonogram_board_controller.dart';
+import '../../pages/tango_game/tango_board_controller.dart';
+import '../../widgets/loading_dialog.dart';
 
 class FullModeMapController extends GetxController {
   final String mapId;

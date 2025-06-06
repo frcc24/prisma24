@@ -5,14 +5,14 @@ import 'package:get/get.dart';
 import '../../../core/progress_storage.dart';
 import 'full_mode_map_page.dart';
 
-class FullModePage extends StatefulWidget {
-  const FullModePage({super.key});
+class MapSelectionPage extends StatefulWidget {
+  const MapSelectionPage({super.key});
 
   @override
-  State<FullModePage> createState() => _FullModePageState();
+  State<MapSelectionPage> createState() => _MapSelectionPageState();
 }
 
-class _FullModePageState extends State<FullModePage> {
+class _MapSelectionPageState extends State<MapSelectionPage> {
 
   Future<List<Map<String, dynamic>>> _maps() async {
     final snap = await FirebaseFirestore.instance
