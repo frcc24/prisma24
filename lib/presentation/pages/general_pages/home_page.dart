@@ -46,7 +46,7 @@ class HomePage extends StatelessWidget {
                   color: Colors.green,
                   label: 'start_prism'.tr,
                   icon: Icons.play_arrow,
-                  onTap: () => Navigator.pushNamed(context, '/prism'),
+                  onTap: () => Get.toNamed('/prism'),
                 ),
                 // _MenuButton(
                 //   color: Colors.lightGreen,
@@ -64,25 +64,25 @@ class HomePage extends StatelessWidget {
                   color: Colors.purpleAccent,
                   label: 'start_full'.tr,
                   icon: Icons.map,
-                  onTap: () => Navigator.pushNamed(context, '/full'),
+                  onTap: () => Get.toNamed('/full'),
                 ),
                 _MenuButton(
                   color: Colors.blue,
                   label: 'leaderboards'.tr,
                   icon: Icons.bar_chart,
-                  onTap: () => Navigator.pushNamed(context, '/rank'),
+                  onTap: () => Get.toNamed('/rank'),
                 ),
                 _MenuButton(
                   color: Colors.orange,
                   label: 'settings'.tr,
                   icon: Icons.settings,
-                  onTap: () => Navigator.pushNamed(Get.context!, '/settings'),
+                  onTap: () => Get.toNamed('/settings'),
                 ),
                 _MenuButton(
                   color: Colors.cyan,
                   label: 'add_phase'.tr,
                   icon: Icons.upload_file,
-                  onTap: () => Navigator.pushNamed(Get.context!, '/add_phase'),
+                  onTap: () => Get.toNamed('/add_phase'),
                 ),
                   _MenuButton(
                   color: Colors.red,

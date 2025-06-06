@@ -26,8 +26,9 @@ class FullModeMapPage extends GetView<FullModeMapController> {
           title: Text('${controller.mapTotal.value}'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context)
-                .popUntil(ModalRoute.withName('/full')),
+            onPressed: () => Get.until(
+              (route) => route.settings.name == '/full',
+            ),
           ),
           actions: const [
             Padding(
@@ -97,14 +98,11 @@ class FullModeMapPage extends GetView<FullModeMapController> {
                             child: InkWell(
                               onTap: () async {
                                 if (controller.nextUnlocked.value) {
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => FullModeMapPage(
-                                          mapId: controller.nextMapId.value!),
-                                      settings:
-                                          const RouteSettings(name: '/full_map'),
-                                    ),
+                                  await Get.to(
+                                    () => FullModeMapPage(
+                                        mapId: controller.nextMapId.value!),
+                                    routeName: '/full_map',
+                                    arguments: controller.nextMapId.value,
                                   );
                                 } else {
                                   final confirm = await showDialog<bool>(

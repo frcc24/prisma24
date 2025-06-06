@@ -44,9 +44,7 @@ class TangoBoardPage extends GetView<TangoBoardController> {
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         if (await _confirmExit(context) && context.mounted) {
-          Navigator.of(context).popUntil(
-            ModalRoute.withName('/full_map'),
-          );
+          Get.until((route) => route.settings.name == '/full_map');
         }
       },
       child: Scaffold(
@@ -55,9 +53,7 @@ class TangoBoardPage extends GetView<TangoBoardController> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () async {
             if (await _confirmExit(context) && context.mounted) {
-              Navigator.of(context).popUntil(
-                ModalRoute.withName('/full_map'),
-              );
+              Get.until((route) => route.settings.name == '/full_map');
             }
           },
         ),
