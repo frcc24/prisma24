@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -50,9 +52,15 @@ class FullModeMapPage extends GetView<FullModeMapController> {
               if (!snap.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
+              final available = snap.data!;
               return LayoutBuilder(
                 builder: (context, constraints) {
+                  final pointCount = math.min(
+                    controller.relativePoints.length,
+                    available,
+                  );
                   final points = controller.relativePoints
+                      .take(pointCount)
                       .map((p) => Offset(
                             p.dx * constraints.maxWidth,
                             p.dy * constraints.maxHeight,
@@ -73,7 +81,7 @@ class FullModeMapPage extends GetView<FullModeMapController> {
                             Size(constraints.maxWidth, constraints.maxHeight),
                         painter: _PathPainter(points),
                       ),
-                      for (int i = 0; i < controller.relativePoints.length; i++)
+                      for (int i = 0; i < pointCount; i++)
                         Positioned(
                           left: points[i].dx - 30,
                           top: points[i].dy - 30,
@@ -124,13 +132,18 @@ class FullModeMapPage extends GetView<FullModeMapController> {
                                   );
                                   if (confirm == true &&
                                       controller.nextMapId.value != null) {
+                                    final id = controller.nextMapId.value!;
                                     final storage =
                                         await ProgressStorage.getInstance();
-                                    await storage
-                                        .unlockMap(controller.nextMapId.value!);
+                                    await storage.unlockMap(id);
                                     controller.nextUnlocked.value = true;
                                     Get.snackbar('Ok', 'unlocked'.tr,
                                         snackPosition: SnackPosition.BOTTOM);
+                                    await Get.to(
+                                      () => FullModeMapPage(mapId: id),
+                                      binding: FullModeMapBinding(id),
+                                      routeName: '/full_map',
+                                    );
                                   }
                                 }
                               },
