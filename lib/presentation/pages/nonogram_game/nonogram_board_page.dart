@@ -59,9 +59,9 @@ class NonogramBoard extends GetView<NonogramBoardController> {
         ],
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/ui/bg_gradient.png'),
+            image: AssetImage(controller.backgroundPath),
             fit: BoxFit.cover,
           ),
         ),

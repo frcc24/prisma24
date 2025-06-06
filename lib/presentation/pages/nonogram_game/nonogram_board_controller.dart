@@ -34,6 +34,8 @@ class NonogramBoardController extends GetxController {
   late List<List<int>> solutionMatrix;
   final RxList<List<int>> currentMatrix = <List<int>>[].obs;
 
+  String backgroundPath = 'assets/images/ui/bg_gradient.png';
+
   String? currentMapId;
   int? currentPhaseIndex;
 

@@ -292,11 +292,15 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
         final data = phases.docs[i].data();
         final game = data['game'] as String? ?? 'tango';
         if (game == 'nonogram') {
-          await Get.find<NonogramBoardController>().loadPhase(widget.mapId, i);
+          final ctrl = Get.find<NonogramBoardController>();
+          ctrl.backgroundPath = _bgPath;
+          await ctrl.loadPhase(widget.mapId, i);
           Navigator.of(Get.context!, rootNavigator: true).pop(); //fechar o dialog
           await Navigator.pushNamed(Get.context!, '/nonogram');
         } else {
-          await Get.find<TangoBoardController>().loadPhase(widget.mapId, i);
+          final ctrl = Get.find<TangoBoardController>();
+          ctrl.backgroundPath = _bgPath;
+          await ctrl.loadPhase(widget.mapId, i);
           Navigator.of(Get.context!, rootNavigator: true).pop(); //fechar o dialog
           await Navigator.pushNamed(Get.context!, '/tango');
         }

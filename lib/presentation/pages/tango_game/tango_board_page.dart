@@ -63,9 +63,9 @@ class TangoBoardPage extends GetView<TangoBoardController> {
         ],
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/ui/bg_gradient.png'),
+            image: AssetImage(controller.backgroundPath),
             fit: BoxFit.cover,
           ),
         ),
@@ -151,9 +151,9 @@ class TangoBoardPage extends GetView<TangoBoardController> {
                         (constraints.maxWidth - totalSpacing) / n;
 
                     return Container(
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage('assets/images/ui/bg_gradient.png'),
+                          image: AssetImage(controller.backgroundPath),
                           fit: BoxFit.cover,
                         ),
                       ),
