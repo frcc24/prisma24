@@ -76,7 +76,7 @@ class TangoBoardPage extends GetView<TangoBoardController> {
             image: AssetImage(controller.backgroundPath),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.4),
+              Colors.black.withValues(alpha:0.4),
               BlendMode.darken,
             ),
           ),
@@ -168,7 +168,7 @@ class TangoBoardPage extends GetView<TangoBoardController> {
                           image: AssetImage(controller.backgroundPath),
                           fit: BoxFit.cover,
                           colorFilter: ColorFilter.mode(
-                            Colors.black.withOpacity(0.4),
+                            Colors.black.withValues(alpha: 0.4),
                             BlendMode.darken,
                           ),
                         ),

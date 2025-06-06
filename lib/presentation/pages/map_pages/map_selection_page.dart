@@ -160,7 +160,7 @@ class _MapSelectionPageState extends State<MapSelectionPage> {
                     if (!unlocked)
                       Positioned.fill(
                         child: Container(
-                          color: Colors.black54.withOpacity(0.6),
+                          color: Colors.black54.withValues(alpha:0.6),
                           alignment: Alignment.center,
                           child:
                               const Icon(Icons.lock, color: Colors.white, size: 48),

@@ -154,7 +154,7 @@ class FullModeMapPage extends GetView<FullModeMapController> {
                                         )
                                       : null,
                                   color: controller.btnPath == null
-                                      ? Colors.purple.withOpacity(
+                                      ? Colors.purple.withValues(alpha:
                                           controller.nextUnlocked.value ? 1 : 0.4)
                                       : null,
                                   shape: BoxShape.circle,

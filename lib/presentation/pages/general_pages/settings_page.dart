@@ -152,7 +152,7 @@ class _SettingsPageState extends State<SettingsPage> {
           await FirebaseAuth.instance.signInWithCredential(credential);
       setState(() => _user = result.user);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(Get.context!).showSnackBar(
         SnackBar(content: Text('error'.tr)),
       );
     }
