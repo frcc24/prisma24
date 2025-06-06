@@ -153,12 +153,10 @@ class _MapSelectionPageState extends State<MapSelectionPage> {
                           Get.snackbar('Ops', 'complete_prev_map'.tr,
                               snackPosition: SnackPosition.BOTTOM);
                         } else {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => FullModeMapPage(mapId: id),
-                              settings: const RouteSettings(name: '/full_map'),
-                            ),
+                          await Get.to(
+                            () => FullModeMapPage(mapId: id),
+                            routeName: '/full_map',
+                            arguments: id,
                           );
                           if (mounted) setState(() {});
                         }
