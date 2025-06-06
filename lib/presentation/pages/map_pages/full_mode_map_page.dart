@@ -9,7 +9,9 @@ import '../../widgets/outlined_icon.dart';
 
 class FullModeMapPage extends GetView<FullModeMapController> {
   final String mapId;
-  const FullModeMapPage({super.key, required this.mapId}) : super(tag: mapId);
+  @override
+  final String? tag;
+  const FullModeMapPage({super.key, required this.mapId}) : tag = mapId;
 
   @override
   Widget build(BuildContext context) {
