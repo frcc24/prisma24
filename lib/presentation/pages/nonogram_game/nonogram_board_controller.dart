@@ -63,10 +63,10 @@ class NonogramBoardController extends GetxController {
   void stopTimer() => _stopTimer();
 
   void _updateScore() {
-    final timePen = elapsedSeconds.value ~/ 2;
+    final timePen = (elapsedSeconds.value ~/ 2) * 10;
     final clickLimit = size.value * size.value;
-    final clickPen = max(0, clicks.value - clickLimit) * 2;
-    final hintPen = hintsUsed.value * 50;
+    final clickPen = max(0, clicks.value - clickLimit) * 20;
+    final hintPen = hintsUsed.value * 500;
     score.value = max(0, _baseScore - timePen - clickPen - hintPen);
     if (score.value <= 0) {
       _handleLoss();
@@ -253,7 +253,7 @@ class NonogramBoardController extends GetxController {
     hintsUsed.value = 0;
     clicks.value = 0;
     elapsedSeconds.value = 0;
-    _baseScore = size.value * size.value * 5;
+    _baseScore = 10000;
     score.value = _baseScore;
     _stopTimer();
     _startTimer();
