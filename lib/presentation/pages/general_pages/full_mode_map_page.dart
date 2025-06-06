@@ -24,6 +24,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
   String? _nextMapId;
   String? _bgAsset;
   String? _btnAsset;
+  int _mapTotal = 0;
 
   String get _bgPath {
     if (_bgAsset == null) return 'assets/images/ui/bg_gradient.png';
@@ -179,6 +180,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
     final storage = await ProgressStorage.getInstance();
     setState(() {
       _completed = storage.getCompleted(widget.mapId);
+      _mapTotal = storage.getMapTotal(widget.mapId);
     });
   }
 
@@ -313,6 +315,8 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
       appBar: AppBar(
         backgroundColor: Colors.black54,
         elevation: 0,
+        centerTitle: true,
+        title: Text('$_mapTotal'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),

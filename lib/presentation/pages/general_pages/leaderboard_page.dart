@@ -1,65 +1,62 @@
-// lib/presentation/pages/leaderboard_page.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 
-/// Página que exibe o TOP-100 de pontuações, em tempo real, via Firestore.
 class LeaderboardPage extends StatelessWidget {
   const LeaderboardPage({super.key});
 
-  /// Stream ordenada (desc) por score, limitada a 100 documentos.
-  Stream<QuerySnapshot<Map<String, dynamic>>> _top100Stream() =>
+  Stream<QuerySnapshot<Map<String, dynamic>>> _maps() => FirebaseFirestore.instance
+      .collection('maps')
+      .orderBy('createdAt')
+      .snapshots();
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> _leaders(String mapId) =>
       FirebaseFirestore.instance
-          .collection('scores')
+          .collection('map_leaderboards')
+          .where('mapId', isEqualTo: mapId)
           .orderBy('score', descending: true)
-          .limit(100)
+          .limit(5)
           .snapshots();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('top100'.tr),
-      ),
+      appBar: AppBar(title: Text('leaderboards'.tr)),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: _top100Stream(),
+        stream: _maps(),
         builder: (context, snap) {
-          if (snap.hasError) {
-            return Center(child: Text('Erro: ${snap.error}'));
-          }
-          if (snap.connectionState == ConnectionState.waiting) {
+          if (!snap.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
-          final docs = snap.data!.docs;
-          if (docs.isEmpty) {
-            return Center(child: Text('no_scores'.tr));
+          final maps = snap.data!.docs;
+          if (maps.isEmpty) {
+            return Center(child: Text('no_maps'.tr));
           }
-
-          return ListView.separated(
-            itemCount: docs.length,
-            separatorBuilder: (_, __) => const Divider(height: 1),
-            itemBuilder: (context, i) {
-              final data = docs[i].data();
-              final name  = data['name']  ?? 'Jogador';
-              final score = data['score'] ?? 0;
-              return ListTile(
-                leading: Text(
-                  '#${i + 1}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+          return ListView(
+            children: [
+              for (final m in maps)
+                StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  stream: _leaders(m.id),
+                  builder: (context, snap2) {
+                    final docs = snap2.data?.docs ?? [];
+                    final first = docs.isNotEmpty ? docs.first.data() : null;
+                    return ExpansionTile(
+                      title: Text(m.id),
+                      subtitle: first != null
+                          ? Text('${first['name']} - ${first['score']}')
+                          : Text('no_scores'.tr),
+                      children: [
+                        for (int i = 1; i < docs.length; i++)
+                          ListTile(
+                            leading: Text('#${i + 1}'),
+                            title: Text(docs[i]['name']),
+                            trailing: Text('${docs[i]['score']}'),
+                          ),
+                      ],
+                    );
+                  },
                 ),
-                title: Text(name),
-                trailing: Text(
-                  '$score',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              );
-            },
+            ],
           );
         },
       ),

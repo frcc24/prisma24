@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/progress_storage.dart';
 import '../../../core/life_manager.dart';
 import '../../../core/sfx.dart';
+import '../../../core/leaderboard_service.dart';
 
 /// Controller for the Nonogram puzzle board.
 ///
@@ -161,6 +162,8 @@ class NonogramBoardController extends GetxController {
       if (currentMapId != null && currentPhaseIndex != null) {
         ProgressStorage.getInstance().then(
             (p) => p.addCompletion(currentMapId!, currentPhaseIndex!));
+        LeaderboardService()
+            .savePhaseScore(currentMapId!, currentPhaseIndex!, score.value);
       }
       Get.dialog(
         AlertDialog(
