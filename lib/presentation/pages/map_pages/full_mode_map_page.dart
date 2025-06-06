@@ -26,8 +26,9 @@ class FullModeMapPage extends GetView<FullModeMapController> {
           title: Text('${controller.mapTotal.value}'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context)
-                .popUntil(ModalRoute.withName('/full')),
+            onPressed: () => Get.until(
+              (route) => route.settings.name == '/full',
+            ),
           ),
           actions: const [
             Padding(
@@ -49,7 +50,6 @@ class FullModeMapPage extends GetView<FullModeMapController> {
               if (!snap.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final phaseCount = snap.data!;
               return LayoutBuilder(
                 builder: (context, constraints) {
                   final points = controller.relativePoints
