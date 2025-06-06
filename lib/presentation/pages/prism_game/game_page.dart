@@ -83,8 +83,7 @@ class GamePage extends ConsumerWidget {
     );
   }
 
-    Future<void> saveScore(String name, int score) =>
-      ScoreRepository().savePrismScore(name, score);
+    Future<void> saveScore(String name, int score) async {}
 
   /* ───────── Diálogo de fim ───────── */
 
@@ -97,11 +96,7 @@ class GamePage extends ConsumerWidget {
       final pen    = elapsed ~/ 3;
       final total  = base + bonus - pen;
 
-      getPlayerName().then((name) {
-        if (won) {
-          saveScore(name, total);
-        }
-      });
+
 
     showDialog(
       context: context,

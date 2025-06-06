@@ -10,6 +10,17 @@ class LeaderboardService {
 
   final ScoreRepository _scores;
 
+  Future<int> getMinScore(String mapId, int phaseIndex) {
+    return _scores.lowestTopScore(mapId, phaseIndex);
+  }
+
+  Future<void> maybeSavePhaseScore(
+      String mapId, int phaseIndex, int score, int threshold) async {
+    if (score > threshold) {
+      await savePhaseScore(mapId, phaseIndex, score);
+    }
+  }
+
   Future<void> savePhaseScore(String mapId, int phaseIndex, int score) async {
     final name = await getPlayerName();
 
@@ -17,7 +28,5 @@ class LeaderboardService {
 
     final storage = await ProgressStorage.getInstance();
     await storage.setHighScore(mapId, phaseIndex, score);
-    final total = storage.getMapTotal(mapId);
-    await _scores.updateMapTotal(mapId, name, total);
   }
 }
