@@ -46,8 +46,11 @@ class NonogramBoardController extends GetxController {
   Color closedTileColor = Colors.grey.shade900;
   Color selectedTileColor = Colors.blueAccent;
 
-  List<int> rowCounts = [];
-  List<int> colCounts = [];
+  /// Hints for each row/column as sequences of block sizes.
+  List<List<int>> rowHints = [];
+  List<List<int>> colHints = [];
+  /// Indicates if the loaded puzzle has a unique solution.
+  RxBool isUniqueSolution = false.obs;
 
   void _startTimer() {
     _timer?.cancel();
@@ -196,13 +199,17 @@ class NonogramBoardController extends GetxController {
     currentMatrix.assignAll(
       List.generate(size.value, (_) => List.filled(size.value, 0)),
     );
-    rowCounts = [
-      for (final row in solutionMatrix) row.where((e) => e == 1).length
+
+    rowHints = [
+      for (final row in solutionMatrix) _blocksFromLine(row),
     ];
-    colCounts = List.generate(
+    colHints = List.generate(
       size.value,
-      (c) => solutionMatrix.fold(0, (p, r) => p + (r[c] == 1 ? 1 : 0)),
+      (c) => _blocksFromLine([
+        for (final row in solutionMatrix) row[c]
+      ]),
     );
+    _updateImpossibleCells();
   }
 
   void toggleTile(int row, int col) {
@@ -212,11 +219,18 @@ class NonogramBoardController extends GetxController {
       isLoading.value = false;
       return;
     }
-    final newVal = currentMatrix[row][col] == 1 ? 0 : 1;
+    final oldVal = currentMatrix[row][col];
+    final newVal = (oldVal + 1) % 3;
     currentMatrix[row][col] = newVal;
+    if (!_isRowValid(row) || !_isColValid(col)) {
+      currentMatrix[row][col] = oldVal;
+      isLoading.value = false;
+      return;
+    }
     currentMatrix.refresh();
     clicks.value++;
     _updateScore();
+    _updateImpossibleCells();
     if (_checkCompletion()) {
       Sfx().win();
       _stopTimer();
@@ -249,7 +263,8 @@ class NonogramBoardController extends GetxController {
   bool _checkCompletion() {
     for (int i = 0; i < size.value; i++) {
       for (int j = 0; j < size.value; j++) {
-        if (currentMatrix[i][j] != solutionMatrix[i][j]) {
+        final cur = currentMatrix[i][j] == 2 ? 0 : currentMatrix[i][j];
+        if (cur != solutionMatrix[i][j]) {
           return false;
         }
       }
@@ -279,6 +294,7 @@ class NonogramBoardController extends GetxController {
     score.value = _baseScore;
     _stopTimer();
     _startTimer();
+    _updateImpossibleCells();
   }
 
   void revealHint() {
@@ -306,6 +322,7 @@ class NonogramBoardController extends GetxController {
       revealedMatrix.refresh();
       hintMatrix.refresh();
       _updateScore();
+      _updateImpossibleCells();
       if (_checkCompletion()) {
         Sfx().win();
         _stopTimer();
@@ -394,6 +411,197 @@ class NonogramBoardController extends GetxController {
   void onClose() {
     _stopTimer();
     super.onClose();
+  }
+
+  List<int> _blocksFromLine(List<int> line) {
+    final List<int> blocks = [];
+    int count = 0;
+    for (final v in line) {
+      if (v == 1) {
+        count++;
+      } else {
+        if (count > 0) {
+          blocks.add(count);
+          count = 0;
+        }
+      }
+    }
+    if (count > 0) blocks.add(count);
+    return blocks.isEmpty ? [0] : blocks;
+  }
+
+  bool _listEquals(List<int> a, List<int> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  List<List<int>> _generatePatterns(int length, List<int> hints) {
+    final List<List<int>> results = [];
+
+    void place(List<int> partial, int hintIndex, int pos) {
+      if (hintIndex == hints.length) {
+        results.add([
+          ...partial,
+          ...List.filled(length - pos, 0),
+        ]);
+        return;
+      }
+
+      final hint = hints[hintIndex];
+      final remaining = hints
+              .sublist(hintIndex + 1)
+              .fold(0, (p, e) => p + e) +
+          (hints.length - hintIndex - 1);
+      for (int start = pos; start <= length - hint - remaining; start++) {
+        final prefixZeros = List.filled(start - pos, 0);
+        final block = List.filled(hint, 1);
+        final nextPos = start + hint;
+        final newPartial = [...partial, ...prefixZeros, ...block];
+        if (hintIndex < hints.length - 1) {
+          if (nextPos < length) {
+            place([...newPartial, 0], hintIndex + 1, nextPos + 1);
+          }
+        } else {
+          place(newPartial, hintIndex + 1, nextPos);
+        }
+      }
+    }
+
+    place([], 0, 0);
+    return results;
+  }
+
+  bool _columnsPrefixValid(List<List<int>> board, int lastRow) {
+    final n = size.value;
+    for (int c = 0; c < n; c++) {
+      final hints = colHints[c];
+      int hintIdx = 0;
+      int runLen = 0;
+      for (int r = 0; r <= lastRow; r++) {
+        final val = board[r][c];
+        if (val == 1) {
+          if (hintIdx >= hints.length) return false;
+          runLen++;
+          if (runLen > hints[hintIdx]) return false;
+        } else {
+          if (runLen > 0) {
+            if (runLen != hints[hintIdx]) return false;
+            hintIdx++;
+            runLen = 0;
+          }
+        }
+      }
+      if (runLen > hints[hintIdx.clamp(0, hints.length - 1)]) return false;
+    }
+    return true;
+  }
+
+  bool _columnsValidComplete(List<List<int>> board) {
+    final n = size.value;
+    for (int c = 0; c < n; c++) {
+      final seq = _blocksFromLine([
+        for (int r = 0; r < n; r++) board[r][c]
+      ]);
+      if (!_listEquals(seq, colHints[c])) return false;
+    }
+    return true;
+  }
+
+  List<List<List<int>>> _findAllSolutions({int limit = 2}) {
+    final n = size.value;
+    final options = <List<List<int>>>[];
+    for (int r = 0; r < n; r++) {
+      final rowOpts = <List<int>>[];
+      for (final p in _generatePatterns(n, rowHints[r])) {
+        bool ok = true;
+        for (int c = 0; c < n; c++) {
+          final cur = currentMatrix[r][c];
+          if (cur == 1 && p[c] != 1) {
+            ok = false;
+            break;
+          }
+          if (cur == 2 && p[c] == 1) {
+            ok = false;
+            break;
+          }
+        }
+        if (ok) rowOpts.add(p);
+      }
+      if (rowOpts.isEmpty) return [];
+      options.add(rowOpts);
+    }
+
+    final board = List.generate(n, (_) => List<int>.filled(n, 0));
+    final solutions = <List<List<int>>>[];
+
+    void search(int row) {
+      if (solutions.length >= limit) return;
+      if (row == n) {
+        if (_columnsValidComplete(board)) {
+          solutions.add([
+            for (final r in board) List<int>.from(r)
+          ]);
+        }
+        return;
+      }
+      for (final pattern in options[row]) {
+        board[row] = pattern;
+        if (_columnsPrefixValid(board, row)) {
+          search(row + 1);
+        }
+      }
+    }
+
+    search(0);
+    return solutions;
+  }
+
+  void _updateImpossibleCells() {
+    final sols = _findAllSolutions(limit: 2);
+    isUniqueSolution.value = sols.length == 1;
+    if (sols.isEmpty) return;
+    final n = size.value;
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        if (currentMatrix[i][j] == 1) continue;
+        bool canBe1 = false;
+        for (final s in sols) {
+          if (s[i][j] == 1) {
+            canBe1 = true;
+            break;
+          }
+        }
+        if (!canBe1 && currentMatrix[i][j] == 0) {
+          currentMatrix[i][j] = 2; // mark X
+        }
+      }
+    }
+    currentMatrix.refresh();
+  }
+
+  bool _isRowValid(int row) {
+    final hints = rowHints[row];
+    final line = [for (final v in currentMatrix[row]) v == 1 ? 1 : 0];
+    final seq = _blocksFromLine(line);
+    if (seq.length > hints.length) return false;
+    for (int i = 0; i < seq.length; i++) {
+      if (seq[i] > hints[i]) return false;
+    }
+    return true;
+  }
+
+  bool _isColValid(int col) {
+    final hints = colHints[col];
+    final line = [for (int r = 0; r < size.value; r++) currentMatrix[r][col] == 1 ? 1 : 0];
+    final seq = _blocksFromLine(line);
+    if (seq.length > hints.length) return false;
+    for (int i = 0; i < seq.length; i++) {
+      if (seq[i] > hints[i]) return false;
+    }
+    return true;
   }
 
   Color _parseColor(dynamic value) {
