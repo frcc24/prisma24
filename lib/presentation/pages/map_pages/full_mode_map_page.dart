@@ -6,6 +6,7 @@ import '../../controllers/map_pages/full_mode_map_controller.dart';
 import '../../widgets/lives_bar.dart';
 import '../../widgets/phase_button.dart';
 import '../../widgets/outlined_icon.dart';
+import '../../bindings/full_mode_map_binding.dart';
 
 class FullModeMapPage extends GetView<FullModeMapController> {
   final String mapId;
@@ -15,7 +16,6 @@ class FullModeMapPage extends GetView<FullModeMapController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(FullModeMapController(mapId), tag: mapId);
     return Obx(() {
       return Scaffold(
         extendBodyBehindAppBar: true,
@@ -97,11 +97,11 @@ class FullModeMapPage extends GetView<FullModeMapController> {
                             child: InkWell(
                               onTap: () async {
                                 if (controller.nextUnlocked.value) {
+                                  final id = controller.nextMapId.value!;
                                   await Get.to(
-                                    () => FullModeMapPage(
-                                        mapId: controller.nextMapId.value!),
+                                    () => FullModeMapPage(mapId: id),
+                                    binding: FullModeMapBinding(id),
                                     routeName: '/full_map',
-                                    arguments: controller.nextMapId.value,
                                   );
                                 } else {
                                   final confirm = await showDialog<bool>(

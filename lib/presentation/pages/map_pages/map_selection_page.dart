@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../core/progress_storage.dart';
 import 'full_mode_map_page.dart';
+import '../../bindings/full_mode_map_binding.dart';
 
 class MapSelectionPage extends StatefulWidget {
   const MapSelectionPage({super.key});
@@ -155,8 +156,8 @@ class _MapSelectionPageState extends State<MapSelectionPage> {
                         } else {
                           await Get.to(
                             () => FullModeMapPage(mapId: id),
+                            binding: FullModeMapBinding(id),
                             routeName: '/full_map',
-                            arguments: id,
                           );
                           if (mounted) setState(() {});
                         }
