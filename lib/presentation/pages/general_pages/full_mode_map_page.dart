@@ -22,6 +22,7 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
   List<int> _completed = [];
   late final List<Offset> _relativePoints;
   String? _nextMapId;
+  bool _nextUnlocked = false;
   String? _bgAsset;
   String? _btnAsset;
   int _mapTotal = 0;
@@ -178,9 +179,15 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
 
   Future<void> _loadCompleted() async {
     final storage = await ProgressStorage.getInstance();
+    final completed = storage.getCompleted(widget.mapId);
+    bool nextUnlocked = _nextUnlocked;
+    if (_nextMapId != null) {
+      nextUnlocked = storage.isMapUnlocked(_nextMapId!) || completed.length >= 8;
+    }
     setState(() {
-      _completed = storage.getCompleted(widget.mapId);
+      _completed = completed;
       _mapTotal = storage.getMapTotal(widget.mapId);
+      _nextUnlocked = nextUnlocked;
     });
   }
 
@@ -232,7 +239,13 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
         .doc(nextId)
         .get();
     if (doc.exists) {
-      setState(() => _nextMapId = nextId);
+      final storage = await ProgressStorage.getInstance();
+      final unlocked = storage.isMapUnlocked(nextId) ||
+          storage.getCompleted(widget.mapId).length >= 8;
+      setState(() {
+        _nextMapId = nextId;
+        _nextUnlocked = unlocked;
+      });
     }
   }
 
@@ -385,13 +398,41 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
                           shape: const CircleBorder(),
                           clipBehavior: Clip.antiAlias,
                           child: InkWell(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => FullModeMapPage(mapId: _nextMapId!),
-                                settings: const RouteSettings(name: '/full_map'),
-                              ),
-                            ),
+                            onTap: () async {
+                              if (_nextUnlocked) {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => FullModeMapPage(mapId: _nextMapId!),
+                                    settings: const RouteSettings(name: '/full_map'),
+                                  ),
+                                );
+                              } else {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (_) => AlertDialog(
+                                    title: Text('unlock_map_q'.tr),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context, false),
+                                        child: Text('cancel'.tr),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () => Navigator.pop(context, true),
+                                        child: Text('watch_ad'.tr),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true && _nextMapId != null) {
+                                  final storage = await ProgressStorage.getInstance();
+                                  await storage.unlockMap(_nextMapId!);
+                                  setState(() => _nextUnlocked = true);
+                                  Get.snackbar('Ok', 'unlocked'.tr,
+                                      snackPosition: SnackPosition.BOTTOM);
+                                }
+                              }
+                            },
                             customBorder: const CircleBorder(),
                             child: Ink(
                               width: 60,
@@ -401,13 +442,23 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
                                     ? DecorationImage(
                                         image: AssetImage(_btnPath!),
                                         fit: BoxFit.cover,
+                                        colorFilter: !_nextUnlocked
+                                            ? const ColorFilter.mode(
+                                                Colors.black45,
+                                                BlendMode.srcATop,
+                                              )
+                                            : null,
                                       )
                                     : null,
-                                color: _btnPath == null ? Colors.purple : null,
+                                color: _btnPath == null
+                                    ? Colors.purple.withOpacity(_nextUnlocked ? 1 : 0.4)
+                                    : null,
                                 shape: BoxShape.circle,
                               ),
                               child: Center(
-                                child: _outlinedIcon(Icons.arrow_forward),
+                                child: _nextUnlocked
+                                    ? _outlinedIcon(Icons.arrow_forward)
+                                    : _outlinedIcon(Icons.lock),
                               ),
                             ),
                           ),

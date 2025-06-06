@@ -68,6 +68,9 @@ class AppTranslations extends Translations {
       'error': 'Error',
       'error_loading': 'Error loading data',
       'phase_not_impl': 'Phase not implemented',
+      'complete_prev_map': 'Complete 80% of the previous map to unlock.',
+      'unlock_map_q': 'Watch ad to unlock this map?',
+      'unlocked': 'Map unlocked!',
     },
     'pt_BR': {
       'start_prism': 'Iniciar jogo Prism',
@@ -134,6 +137,9 @@ class AppTranslations extends Translations {
       'error': 'Erro',
       'error_loading': 'Erro ao carregar',
       'phase_not_impl': 'Fase nao implementada',
+      'complete_prev_map': 'Conclua 80% do mapa anterior para desbloquear.',
+      'unlock_map_q': 'Assistir anúncio para desbloquear este mapa?',
+      'unlocked': 'Mapa desbloqueado!',
     },
   };
 }

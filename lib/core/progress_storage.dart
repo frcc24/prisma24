@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ProgressStorage {
   static const _kKey = 'progress';
   static const _kScoreKey = 'scores';
+  static const _kUnlockedKey = 'unlocked_maps';
   final SharedPreferences _prefs;
   ProgressStorage._(this._prefs);
 
@@ -19,8 +20,26 @@ class ProgressStorage {
     return decoded.map((k, v) => MapEntry(k, List<int>.from(v as List)));
   }
 
+  List<String> _getUnlocked() {
+    final str = _prefs.getString(_kUnlockedKey);
+    if (str == null) return <String>[];
+    return List<String>.from(jsonDecode(str) as List);
+  }
+
   List<int> getCompleted(String mapId) {
     return _getAll()[mapId] ?? <int>[];
+  }
+
+  bool isMapUnlocked(String mapId) {
+    return _getUnlocked().contains(mapId);
+  }
+
+  Future<void> unlockMap(String mapId) async {
+    final unlocked = _getUnlocked();
+    if (!unlocked.contains(mapId)) {
+      unlocked.add(mapId);
+      await _prefs.setString(_kUnlockedKey, jsonEncode(unlocked));
+    }
   }
 
   Future<void> addCompletion(String mapId, int phaseIndex) async {
@@ -33,6 +52,7 @@ class ProgressStorage {
   Future<void> reset() async {
     await _prefs.remove(_kKey);
     await _prefs.remove(_kScoreKey);
+    await _prefs.remove(_kUnlockedKey);
   }
 
   Map<String, Map<String, int>> _getScores() {
