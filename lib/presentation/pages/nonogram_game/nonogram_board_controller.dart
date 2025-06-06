@@ -209,7 +209,7 @@ class NonogramBoardController extends GetxController {
         for (final row in solutionMatrix) row[c]
       ]),
     );
-    _updateImpossibleCells();
+    // _updateImpossibleCells();
   }
 
   void toggleTile(int row, int col) {
@@ -230,7 +230,7 @@ class NonogramBoardController extends GetxController {
     currentMatrix.refresh();
     clicks.value++;
     _updateScore();
-    _updateImpossibleCells();
+    // _updateImpossibleCells();
     if (_checkCompletion()) {
       Sfx().win();
       _stopTimer();
@@ -294,7 +294,7 @@ class NonogramBoardController extends GetxController {
     score.value = _baseScore;
     _stopTimer();
     _startTimer();
-    _updateImpossibleCells();
+    // _updateImpossibleCells();
   }
 
   void revealHint() {
@@ -322,7 +322,7 @@ class NonogramBoardController extends GetxController {
       revealedMatrix.refresh();
       hintMatrix.refresh();
       _updateScore();
-      _updateImpossibleCells();
+      // _updateImpossibleCells();
       if (_checkCompletion()) {
         Sfx().win();
         _stopTimer();
@@ -559,28 +559,28 @@ class NonogramBoardController extends GetxController {
     return solutions;
   }
 
-  void _updateImpossibleCells() {
-    final sols = _findAllSolutions(limit: 2);
-    isUniqueSolution.value = sols.length == 1;
-    if (sols.isEmpty) return;
-    final n = size.value;
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < n; j++) {
-        if (currentMatrix[i][j] == 1) continue;
-        bool canBe1 = false;
-        for (final s in sols) {
-          if (s[i][j] == 1) {
-            canBe1 = true;
-            break;
-          }
-        }
-        if (!canBe1 && currentMatrix[i][j] == 0) {
-          currentMatrix[i][j] = 2; // mark X
-        }
-      }
-    }
-    currentMatrix.refresh();
-  }
+  // void _updateImpossibleCells() {
+  //   final sols = _findAllSolutions(limit: 2);
+  //   isUniqueSolution.value = sols.length == 1;
+  //   if (sols.isEmpty) return;
+  //   final n = size.value;
+  //   for (int i = 0; i < n; i++) {
+  //     for (int j = 0; j < n; j++) {
+  //       if (currentMatrix[i][j] == 1) continue;
+  //       bool canBe1 = false;
+  //       for (final s in sols) {
+  //         if (s[i][j] == 1) {
+  //           canBe1 = true;
+  //           break;
+  //         }
+  //       }
+  //       if (!canBe1 && currentMatrix[i][j] == 0) {
+  //         currentMatrix[i][j] = 2; // mark X
+  //       }
+  //     }
+  //   }
+  //   currentMatrix.refresh();
+  // }
 
   bool _isRowValid(int row) {
     final hints = rowHints[row];

@@ -247,13 +247,13 @@ class NonogramBoard extends GetView<NonogramBoardController> {
                   : Colors.grey.shade700,
             ),
           ),
-          child: state == 2
-              ? const Center(
-                  child: Text(
-                  'X',
-                  style: TextStyle(color: Colors.white),
-                ))
-              : null,
+          // child: state == 2
+          //     ? const Center(
+          //         child: Text(
+          //         'X',
+          //         style: TextStyle(color: Colors.white),
+          //       ))
+          //     : null,
         ),
       ),
     );
