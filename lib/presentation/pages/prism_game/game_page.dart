@@ -167,7 +167,9 @@ class GamePage extends ConsumerWidget {
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         if (await _confirmExit(context) && context.mounted) {
-          Navigator.pop(context);
+          Navigator.of(context).popUntil(
+            ModalRoute.withName('/full_map'),
+          );
         }
       },
       child: Scaffold(
@@ -209,7 +211,9 @@ class GamePage extends ConsumerWidget {
             icon: const Icon(Icons.home),
             onPressed: () async {
               if (await _confirmExit(context) && context.mounted) {
-                Navigator.pop(context);
+                Navigator.of(context).popUntil(
+                  ModalRoute.withName('/full_map'),
+                );
               }
             },
           ),
