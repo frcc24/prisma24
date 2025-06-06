@@ -42,6 +42,8 @@ class TangoBoardController extends GetxController {
   Timer? _timer;
   int _baseScore = 0;
 
+  String backgroundPath = 'assets/images/ui/bg_gradient.png';
+
   String? currentMapId;
   int? currentPhaseIndex;
 
