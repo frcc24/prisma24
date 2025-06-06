@@ -60,7 +60,10 @@ class _FullModePageState extends State<FullModePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text('choose_map'.tr),
       ),
       body: Container(
@@ -80,8 +83,15 @@ class _FullModePageState extends State<FullModePage> {
           if (maps.isEmpty) {
             return Center(child: Text('no_maps'.tr));
           }
-          return ListView.builder(
+          return GridView.builder(
+            padding: const EdgeInsets.all(8),
             itemCount: maps.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+              childAspectRatio: 1,
+            ),
             itemBuilder: (context, i) {
               final map = maps[i];
               final id = map['id'] as String;
@@ -96,7 +106,7 @@ class _FullModePageState extends State<FullModePage> {
                       : 'assets/images/ui/bgs/$theme')
                   : 'assets/images/ui/bg_gradient.png';
               return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                margin: EdgeInsets.zero,
                 color: Colors.transparent,
                 clipBehavior: Clip.antiAlias,
                 child: Stack(
