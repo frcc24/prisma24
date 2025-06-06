@@ -41,8 +41,8 @@ class LeaderboardPage extends StatelessWidget {
                   child: Stack(
                     children: [
                       Positioned.fill(
-                        child: Image.asset(
-                          _bgPath(m['bg'] as String?),
+                      child: Image.asset(
+                          _bgPath(m.data()['bg'] as String?),
                           fit: BoxFit.cover,
                         ),
                       ),
