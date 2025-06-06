@@ -235,7 +235,11 @@ class NonogramBoard extends GetView<NonogramBoardController> {
                 ? controller.selectedTileColor
                 : controller.closedTileColor,
             borderRadius: BorderRadius.circular(4),
-            border: Border.all(color: Colors.grey.shade700),
+            border: Border.all(
+              color: controller.hintMatrix[row][col]
+                  ? Colors.white
+                  : Colors.grey.shade700,
+            ),
           ),
         ),
       ),
