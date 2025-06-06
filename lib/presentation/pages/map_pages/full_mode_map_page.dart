@@ -50,7 +50,6 @@ class FullModeMapPage extends GetView<FullModeMapController> {
               if (!snap.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final phaseCount = snap.data!;
               return LayoutBuilder(
                 builder: (context, constraints) {
                   final points = controller.relativePoints
