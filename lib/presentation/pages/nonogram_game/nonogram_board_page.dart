@@ -161,7 +161,8 @@ class NonogramBoard extends GetView<NonogramBoardController> {
                                         width: tileSize,
                                         child: Center(
                                           child: Text(
-                                            '${controller.colCounts[c]}',
+                                            controller.colHints[c].join('\n'),
+                                            textAlign: TextAlign.center,
                                             style: const TextStyle(fontSize: 12),
                                           ),
                                         ),
@@ -176,7 +177,7 @@ class NonogramBoard extends GetView<NonogramBoardController> {
                                         height: tileSize,
                                         child: Center(
                                           child: Text(
-                                            '${controller.rowCounts[r]}',
+                                            controller.rowHints[r].join(' '),
                                             style: const TextStyle(fontSize: 12),
                                           ),
                                         ),
@@ -246,6 +247,13 @@ class NonogramBoard extends GetView<NonogramBoardController> {
                   : Colors.grey.shade700,
             ),
           ),
+          child: state == 2
+              ? const Center(
+                  child: Text(
+                  'X',
+                  style: TextStyle(color: Colors.white),
+                ))
+              : null,
         ),
       ),
     );
