@@ -304,6 +304,32 @@ class NonogramBoardController extends GetxController {
       revealedMatrix.refresh();
       hintMatrix.refresh();
       _updateScore();
+      if (_checkCompletion()) {
+        Sfx().win();
+        _stopTimer();
+        if (currentMapId != null && currentPhaseIndex != null) {
+          ProgressStorage.getInstance().then(
+              (p) => p.addCompletion(currentMapId!, currentPhaseIndex!));
+          LeaderboardService()
+              .savePhaseScore(currentMapId!, currentPhaseIndex!, score.value);
+        }
+        Get.dialog(
+          AlertDialog(
+            title: Text('congrats'.tr),
+            content: Text('${'completed_puzzle'.tr}\nScore: ${score.value}'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                  Get.back();
+                },
+                child: Text('ok'.tr),
+              ),
+            ],
+          ),
+          barrierDismissible: false,
+        );
+      }
     }
     isLoading.value = false;
   }
