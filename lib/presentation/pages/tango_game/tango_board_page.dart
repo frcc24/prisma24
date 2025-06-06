@@ -44,7 +44,9 @@ class TangoBoardPage extends GetView<TangoBoardController> {
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         if (await _confirmExit(context) && context.mounted) {
-          Navigator.pop(context);
+          Navigator.of(context).popUntil(
+            ModalRoute.withName('/full_map'),
+          );
         }
       },
       child: Scaffold(

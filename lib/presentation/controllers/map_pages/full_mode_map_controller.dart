@@ -80,7 +80,7 @@ class FullModeMapController extends GetxController {
   }
 
   Future<void> checkNextMap() async {
-    final match = RegExp(r'(\\d+)\$').firstMatch(mapId);
+    final match = RegExp(r'(\d+)\$').firstMatch(mapId);
     if (match == null) return;
     final nextId = 'mapa${int.parse(match.group(1)!) + 1}';
     final doc = await FirebaseFirestore.instance
