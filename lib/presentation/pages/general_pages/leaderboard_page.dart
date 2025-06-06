@@ -48,13 +48,7 @@ class LeaderboardPage extends StatelessWidget {
                       ),
                       Positioned.fill(
                         child: Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [Colors.transparent, Colors.black54],
-                            ),
-                          ),
+                          color: Colors.black54,
                         ),
                       ),
                       Theme(
