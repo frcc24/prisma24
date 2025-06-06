@@ -336,7 +336,8 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
         title: Text('$_mapTotal'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.of(context)
+              .popUntil(ModalRoute.withName('/full')),
         ),
         actions: const [
           Padding(
