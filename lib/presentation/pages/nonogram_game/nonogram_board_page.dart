@@ -90,8 +90,48 @@ class NonogramBoard extends GetView<NonogramBoardController> {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  const SizedBox(height: 16),
+                  Obx(() {
+                    final remaining = controller.revealedMatrix
+                        .expand((r) => r)
+                        .where((e) => !e)
+                        .length;
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.lightbulb, color: Colors.white),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.yellow[800],
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: remaining > 0
+                              ? () {
+                                  controller.revealHint();
+                                  Sfx().tap();
+                                }
+                              : null,
+                        ),
+                        Positioned(
+                          top: 0,
+                          right: 0,
+                          child: CircleAvatar(
+                            radius: 10,
+                            backgroundColor: remaining > 0
+                                ? Colors.blueAccent
+                                : Colors.grey[800],
+                            child: Text(
+                              '$remaining',
+                              style:
+                                  const TextStyle(color: Colors.white, fontSize: 10),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
+                    padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
                     child: Text(
                       'time_score'.trParams({'elapsed': '$m:$s', 'score': '$sc'}),
                       style: const TextStyle(color: Colors.white),
