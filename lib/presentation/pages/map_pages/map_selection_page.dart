@@ -1,8 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 
 import '../../../core/progress_storage.dart';
+import '../../../data/map_repository.dart';
 import 'full_mode_map_page.dart';
 import '../../bindings/full_mode_map_binding.dart';
 
@@ -14,12 +15,10 @@ class MapSelectionPage extends StatefulWidget {
 }
 
 class _MapSelectionPageState extends State<MapSelectionPage> {
+  final MapRepository _repo = MapRepository();
 
   Future<List<Map<String, dynamic>>> _maps() async {
-    final snap = await FirebaseFirestore.instance
-        .collection('maps')
-        .orderBy('createdAt')
-        .get();
+    final snap = await _repo.fetchMaps();
     final storage = await ProgressStorage.getInstance();
     final maps = <Map<String, dynamic>>[];
 
@@ -28,12 +27,7 @@ class _MapSelectionPageState extends State<MapSelectionPage> {
       final data = d.data();
       final id = d.id;
 
-      final phases = await FirebaseFirestore.instance
-          .collection('maps')
-          .doc(id)
-          .collection('phases')
-          .get();
-      final phaseCount = phases.size;
+      final phaseCount = await _repo.phaseCount(id);
       final completedCount = storage.getCompleted(id).length;
       final percent = phaseCount == 0
           ? 0

@@ -1,17 +1,23 @@
 import 'dart:math';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/life_manager.dart';
 import '../../../core/progress_storage.dart';
+import '../../../data/map_repository.dart';
+import '../../../data/phase_repository.dart';
 import '../../pages/nonogram_game/nonogram_board_controller.dart';
 import '../../pages/tango_game/tango_board_controller.dart';
 import '../../widgets/loading_dialog.dart';
 
 class FullModeMapController extends GetxController {
   final String mapId;
-  FullModeMapController(this.mapId);
+  final MapRepository _mapRepo;
+  final PhaseRepository _phaseRepo;
+  FullModeMapController(this.mapId,
+      {MapRepository? mapRepository, PhaseRepository? phaseRepository})
+      : _mapRepo = mapRepository ?? MapRepository(),
+        _phaseRepo = phaseRepository ?? PhaseRepository();
 
   final RxList<int> completed = <int>[].obs;
   late final List<Offset> relativePoints;
@@ -66,10 +72,7 @@ class FullModeMapController extends GetxController {
   }
 
   Future<void> loadMapAssets() async {
-    final doc = await FirebaseFirestore.instance
-        .collection('maps')
-        .doc(mapId)
-        .get();
+    final doc = await _mapRepo.getMap(mapId);
     if (doc.exists) {
       final data = doc.data();
       if (data != null) {
@@ -87,11 +90,8 @@ class FullModeMapController extends GetxController {
     final match = RegExp(r'(\d+)$').firstMatch(mapId);
     if (match == null) return;
     final nextId = 'mapa${int.parse(match.group(1)!) + 1}';
-    final doc = await FirebaseFirestore.instance
-        .collection('maps')
-        .doc(nextId)
-        .get();
-    if (doc.exists) {
+    final exists = await _mapRepo.mapExists(nextId);
+    if (exists) {
       final storage = await ProgressStorage.getInstance();
       final unlocked =
           storage.isMapUnlocked(nextId) || storage.getCompleted(mapId).length >= 8;
@@ -114,12 +114,7 @@ class FullModeMapController extends GetxController {
   }
 
   Future<int> phaseCount() async {
-    final snap = await FirebaseFirestore.instance
-        .collection('maps')
-        .doc(mapId)
-        .collection('phases')
-        .get();
-    return snap.size;
+    return _mapRepo.phaseCount(mapId);
   }
 
   Future<void> openPhase(int index) async {
@@ -155,15 +150,8 @@ class FullModeMapController extends GetxController {
       barrierColor: Colors.black54,
     );
     try {
-      final phases = await FirebaseFirestore.instance
-          .collection('maps')
-          .doc(mapId)
-          .collection('phases')
-          .orderBy('createdAt')
-          .limit(index + 1)
-          .get();
-      if (!closed && phases.docs.length > index) {
-        final data = phases.docs[index].data();
+      final data = await _phaseRepo.fetchPhase(mapId, index);
+      if (!closed && data != null) {
         final game = data['game'] as String? ?? 'tango';
         if (game == 'nonogram') {
           final ctrl = Get.find<NonogramBoardController>();
