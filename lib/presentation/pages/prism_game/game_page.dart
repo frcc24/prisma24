@@ -177,9 +177,19 @@ class GamePage extends ConsumerWidget {
         backgroundColor:
             controller.isAwaitingBomb ? Colors.orange.shade700 : Colors.transparent,
         elevation: 0,
-        leadingWidth: 104,
+        leadingWidth: 160,
         leading: Row(
           children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () async {
+                if (await _confirmExit(context) && context.mounted) {
+                  Navigator.of(context).popUntil(
+                    ModalRoute.withName('/full_map'),
+                  );
+                }
+              },
+            ),
             _UndoButton(
               remaining: game.undosLeft,
               onPressed: game.undosLeft == 0

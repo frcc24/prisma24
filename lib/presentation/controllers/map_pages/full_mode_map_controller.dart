@@ -106,6 +106,7 @@ class FullModeMapController extends GetxController {
       nextUnlocked.value =
           storage.isMapUnlocked(nextId) || list.length >= 8;
     }
+    await checkNextMap();
   }
 
   Future<int> phaseCount() async {

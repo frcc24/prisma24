@@ -48,6 +48,16 @@ class NonogramBoard extends GetView<NonogramBoardController> {
       },
       child: Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () async {
+            if (await _confirmExit(context) && context.mounted) {
+              Navigator.of(context).popUntil(
+                ModalRoute.withName('/full_map'),
+              );
+            }
+          },
+        ),
         title: Text('nonogram'.tr),
         actions: [
           IconButton(
