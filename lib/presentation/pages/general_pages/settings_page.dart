@@ -2,12 +2,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/progress_storage.dart';
 import '../../../core/sfx.dart';
+import '../../../data/user_repository.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -56,11 +56,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _registerUser(String name) async {
-    final users = FirebaseFirestore.instance.collection('users');
-    final query = await users.where('name', isEqualTo: name).limit(1).get();
-    if (query.docs.isEmpty) {
-      await users.add({'name': name, 'ts': FieldValue.serverTimestamp()});
-    }
+    await UserRepository().registerUser(name);
   }
 
   Future<void> _editName() async {

@@ -2,7 +2,7 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../data/score_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
@@ -84,9 +84,7 @@ class GamePage extends ConsumerWidget {
   }
 
     Future<void> saveScore(String name, int score) =>
-      FirebaseFirestore.instance
-      .collection('scores')
-      .add({'name': name, 'score': score, 'ts': FieldValue.serverTimestamp()});
+      ScoreRepository().savePrismScore(name, score);
 
   /* ───────── Diálogo de fim ───────── */
 

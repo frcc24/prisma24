@@ -4,7 +4,7 @@ import 'dart:math';
 import 'dart:async';
 
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../data/phase_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/progress_storage.dart';
@@ -13,6 +13,7 @@ import '../../../core/sfx.dart';
 import '../../../core/leaderboard_service.dart';
 
 class TangoBoardController extends GetxController {
+  final PhaseRepository _repo = PhaseRepository();
   /// Dimensão do tabuleiro (NxN)
   final RxInt sizeN = 0.obs;
 
@@ -313,21 +314,14 @@ void resetBoard() {
     currentMapId = mapId;
     currentPhaseIndex = index;
     try {
-      final phases = await FirebaseFirestore.instance
-          .collection('maps')
-          .doc(mapId)
-          .collection('phases')
-          .orderBy('createdAt')
-          .limit(index + 1)
-          .get();
-      if (phases.docs.length <= index) {
+      final data = await _repo.fetchPhase(mapId, index);
+      if (data == null) {
         isLoading.value = false;
         Get.snackbar('Erro', 'Fase nao implementada',
             snackPosition: SnackPosition.BOTTOM);
         return;
       }
 
-      final data = phases.docs[index].data();
       final board = Map<String, dynamic>.from(data['board'] as Map);
       final n = board['size'] as int;
       final initial = stringParaMatriz(board['initial']);

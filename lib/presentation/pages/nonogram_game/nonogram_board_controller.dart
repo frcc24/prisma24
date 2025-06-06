@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../data/phase_repository.dart';
 import '../../../core/progress_storage.dart';
 import '../../../core/life_manager.dart';
 import '../../../core/sfx.dart';
@@ -29,6 +29,7 @@ import '../../../core/leaderboard_service.dart';
 /// }
 /// ```
 class NonogramBoardController extends GetxController {
+  final PhaseRepository _repo = PhaseRepository();
   final RxInt size = 0.obs;
   RxBool isLoading = false.obs;
   late List<List<int>> solutionMatrix;
@@ -340,22 +341,15 @@ class NonogramBoardController extends GetxController {
     currentMapId = mapId;
     currentPhaseIndex = index;
     try {
-      final phases = await FirebaseFirestore.instance
-          .collection('maps')
-          .doc(mapId)
-          .collection('phases')
-          .orderBy('createdAt')
-          .limit(index + 1)
-          .get();
+      final data = await _repo.fetchPhase(mapId, index);
 
-      if (phases.docs.length <= index) {
+      if (data == null) {
         isLoading.value = false;
         Get.snackbar('Erro', 'Fase nao implementada',
             snackPosition: SnackPosition.BOTTOM);
         return;
       }
 
-      final data = phases.docs[index].data();
       final board = Map<String, dynamic>.from(data['board'] as Map);
       final n = board['size'] as int;
       final solutionField = board['solution'];

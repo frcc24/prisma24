@@ -1,40 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' show QuerySnapshot;
 import 'package:get/get.dart';
+import '../../../data/map_repository.dart';
+import '../../../data/score_repository.dart';
 
 class LeaderboardPage extends StatelessWidget {
   const LeaderboardPage({super.key});
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> _maps() => FirebaseFirestore.instance
-      .collection('maps')
-      .orderBy('createdAt')
-      .snapshots();
+  Stream<QuerySnapshot<Map<String, dynamic>>> _maps() =>
+      MapRepository().streamMaps();
 
   Stream<QuerySnapshot<Map<String, dynamic>>> _leaders(String mapId) =>
-      FirebaseFirestore.instance
-          .collection('map_leaderboards')
-          .where('mapId', isEqualTo: mapId)
-          .orderBy('score', descending: true)
-          .limit(5)
-          .snapshots();
+      ScoreRepository().mapLeaders(mapId);
 
   Stream<QuerySnapshot<Map<String, dynamic>>> _phases(String mapId) =>
-      FirebaseFirestore.instance
-          .collection('maps')
-          .doc(mapId)
-          .collection('phases')
-          .orderBy('createdAt')
-          .snapshots();
+      MapRepository().streamMapPhases(mapId);
 
   Stream<QuerySnapshot<Map<String, dynamic>>> _phaseLeaders(
           String mapId, int phase) =>
-      FirebaseFirestore.instance
-          .collection('phase_scores')
-          .where('mapId', isEqualTo: mapId)
-          .where('phase', isEqualTo: phase)
-          .orderBy('score', descending: true)
-          .limit(5)
-          .snapshots();
+      ScoreRepository().phaseLeaders(mapId, phase);
 
   @override
   Widget build(BuildContext context) {
