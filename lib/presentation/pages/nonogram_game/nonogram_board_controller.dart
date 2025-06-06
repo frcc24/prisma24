@@ -104,6 +104,7 @@ class NonogramBoardController extends GetxController {
 
   final Random _random = Random();
   final RxList<List<bool>> revealedMatrix = <List<bool>>[].obs;
+  final RxList<List<bool>> hintMatrix = <List<bool>>[].obs;
 
   @override
   void onInit() {
@@ -145,6 +146,9 @@ class NonogramBoardController extends GetxController {
 
     // Setup revealed matrix
     revealedMatrix.assignAll(
+      List.generate(size.value, (_) => List.filled(size.value, false)),
+    );
+    hintMatrix.assignAll(
       List.generate(size.value, (_) => List.filled(size.value, false)),
     );
     final initialField = board['initial'];
@@ -249,6 +253,9 @@ class NonogramBoardController extends GetxController {
         }
       }
     }
+    hintMatrix.assignAll(
+      List.generate(size.value, (_) => List.filled(size.value, false)),
+    );
     currentMatrix.refresh();
     hintsUsed.value = 0;
     clicks.value = 0;
@@ -265,7 +272,7 @@ class NonogramBoardController extends GetxController {
     final List<List<int>> available = [];
     for (int i = 0; i < size.value; i++) {
       for (int j = 0; j < size.value; j++) {
-        if (!revealedMatrix[i][j]) {
+        if (!revealedMatrix[i][j] && currentMatrix[i][j] == 0) {
           available.add([i, j]);
         }
       }
@@ -275,10 +282,12 @@ class NonogramBoardController extends GetxController {
       final r = choice[0];
       final c = choice[1];
       revealedMatrix[r][c] = true;
+      hintMatrix[r][c] = true;
       currentMatrix[r][c] = solutionMatrix[r][c];
       hintsUsed.value++;
       currentMatrix.refresh();
       revealedMatrix.refresh();
+      hintMatrix.refresh();
       _updateScore();
     }
     isLoading.value = false;
