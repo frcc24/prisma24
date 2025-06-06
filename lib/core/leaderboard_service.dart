@@ -11,13 +11,31 @@ class LeaderboardService {
 
   Future<void> savePhaseScore(String mapId, int phaseIndex, int score) async {
     final name = await getPlayerName();
-    await _firestore.collection('phase_scores').add({
-      'mapId': mapId,
-      'phase': phaseIndex,
-      'name': name,
-      'score': score,
-      'ts': FieldValue.serverTimestamp(),
-    });
+
+    final query = await _firestore
+        .collection('phase_scores')
+        .where('mapId', isEqualTo: mapId)
+        .where('phase', isEqualTo: phaseIndex)
+        .orderBy('score', descending: true)
+        .get();
+
+    final docs = query.docs;
+    final shouldSave = docs.length < 5 ||
+        score > (docs.isNotEmpty ? docs.last.data()['score'] as int : 0);
+
+    if (shouldSave) {
+      await _firestore.collection('phase_scores').add({
+        'mapId': mapId,
+        'phase': phaseIndex,
+        'name': name,
+        'score': score,
+        'ts': FieldValue.serverTimestamp(),
+      });
+
+      if (docs.length >= 5) {
+        await docs.last.reference.delete();
+      }
+    }
 
     final storage = await ProgressStorage.getInstance();
     await storage.setHighScore(mapId, phaseIndex, score);
