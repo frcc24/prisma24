@@ -3,11 +3,10 @@
 import 'dart:math';
 import 'dart:async';
 
-import 'dart:convert';
-import '../../../data/phase_repository.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../../data/phase_repository.dart';
 import '../../../core/progress_storage.dart';
 import '../../../core/life_manager.dart';
 import '../../../core/sfx.dart';
