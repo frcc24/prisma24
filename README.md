@@ -31,4 +31,11 @@ firebase deploy --only firestore:indexes
 ```
 
 The index definitions are stored in `firestore.indexes.json`.
+Ensure your `firebase.json` references this file:
+
+```json
+{
+  "firestore": {"indexes": "firestore.indexes.json"}
+}
+```
 
