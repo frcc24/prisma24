@@ -14,10 +14,8 @@ import 'presentation/pages/general_pages/settings_page.dart';
 import 'presentation/pages/map_pages/map_selection_page.dart';
 import 'presentation/pages/map_pages/full_mode_map_page.dart';
 import 'presentation/pages/general_pages/add_phase_page.dart';
-import 'presentation/pages/tango_game/tango_board_controller.dart' show TangoBoardController;
 import 'presentation/pages/tango_game/tango_board_page.dart';
-import 'presentation/pages/nonogram_game/nonogram_board_controller.dart'
-    show NonogramBoardController;
+import 'presentation/bindings/app_bindings.dart';
 import 'presentation/pages/nonogram_game/nonogram_board_page.dart';
 import 'core/life_manager.dart';
 import 'core/sfx.dart';
@@ -53,9 +51,6 @@ class Prisma24App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    Get.put(TangoBoardController());
-    Get.put(NonogramBoardController());
-
     return GetMaterialApp(
       title: 'Prisma 24',
       debugShowCheckedModeBanner: false,
@@ -83,6 +78,7 @@ class Prisma24App extends StatelessWidget {
         '/add_phase': (_) => const AddPhasePage(),
 
       },
+      initialBinding: AppBindings(),
     );
   }
 }
