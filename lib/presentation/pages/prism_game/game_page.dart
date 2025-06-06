@@ -165,9 +165,7 @@ class GamePage extends ConsumerWidget {
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         if (await _confirmExit(context) && context.mounted) {
-          Navigator.of(context).popUntil(
-            ModalRoute.withName('/full_map'),
-          );
+          Get.until((route) => route.settings.name == '/full_map');
         }
       },
       child: Scaffold(
@@ -182,9 +180,7 @@ class GamePage extends ConsumerWidget {
               icon: const Icon(Icons.arrow_back),
               onPressed: () async {
                 if (await _confirmExit(context) && context.mounted) {
-                  Navigator.of(context).popUntil(
-                    ModalRoute.withName('/full_map'),
-                  );
+                  Get.until((route) => route.settings.name == '/full_map');
                 }
               },
             ),
@@ -219,9 +215,7 @@ class GamePage extends ConsumerWidget {
             icon: const Icon(Icons.home),
             onPressed: () async {
               if (await _confirmExit(context) && context.mounted) {
-                Navigator.of(context).popUntil(
-                  ModalRoute.withName('/full_map'),
-                );
+                Get.until((route) => route.settings.name == '/full_map');
               }
             },
           ),

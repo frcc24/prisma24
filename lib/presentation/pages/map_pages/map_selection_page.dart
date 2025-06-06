@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import '../../../core/progress_storage.dart';
 import '../../../data/map_repository.dart';
 import 'full_mode_map_page.dart';
+import '../../bindings/full_mode_map_binding.dart';
 
 class MapSelectionPage extends StatefulWidget {
   const MapSelectionPage({super.key});
@@ -147,12 +148,10 @@ class _MapSelectionPageState extends State<MapSelectionPage> {
                           Get.snackbar('Ops', 'complete_prev_map'.tr,
                               snackPosition: SnackPosition.BOTTOM);
                         } else {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => FullModeMapPage(mapId: id),
-                              settings: const RouteSettings(name: '/full_map'),
-                            ),
+                          await Get.to(
+                            () => FullModeMapPage(mapId: id),
+                            binding: FullModeMapBinding(id),
+                            routeName: '/full_map',
                           );
                           if (mounted) setState(() {});
                         }

@@ -6,6 +6,7 @@ import '../../controllers/map_pages/full_mode_map_controller.dart';
 import '../../widgets/lives_bar.dart';
 import '../../widgets/phase_button.dart';
 import '../../widgets/outlined_icon.dart';
+import '../../bindings/full_mode_map_binding.dart';
 
 class FullModeMapPage extends GetView<FullModeMapController> {
   final String mapId;
@@ -15,7 +16,6 @@ class FullModeMapPage extends GetView<FullModeMapController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(FullModeMapController(mapId), tag: mapId);
     return Obx(() {
       return Scaffold(
         extendBodyBehindAppBar: true,
@@ -26,8 +26,9 @@ class FullModeMapPage extends GetView<FullModeMapController> {
           title: Text('${controller.mapTotal.value}'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context)
-                .popUntil(ModalRoute.withName('/full')),
+            onPressed: () => Get.until(
+              (route) => route.settings.name == '/full',
+            ),
           ),
           actions: const [
             Padding(
@@ -49,7 +50,6 @@ class FullModeMapPage extends GetView<FullModeMapController> {
               if (!snap.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final phaseCount = snap.data!;
               return LayoutBuilder(
                 builder: (context, constraints) {
                   final points = controller.relativePoints
@@ -97,14 +97,11 @@ class FullModeMapPage extends GetView<FullModeMapController> {
                             child: InkWell(
                               onTap: () async {
                                 if (controller.nextUnlocked.value) {
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => FullModeMapPage(
-                                          mapId: controller.nextMapId.value!),
-                                      settings:
-                                          const RouteSettings(name: '/full_map'),
-                                    ),
+                                  final id = controller.nextMapId.value!;
+                                  await Get.to(
+                                    () => FullModeMapPage(mapId: id),
+                                    binding: FullModeMapBinding(id),
+                                    routeName: '/full_map',
                                   );
                                 } else {
                                   final confirm = await showDialog<bool>(

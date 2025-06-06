@@ -83,7 +83,11 @@ class FullModeMapController extends GetxController {
   }
 
   Future<void> checkNextMap() async {
-    final match = RegExp(r'(\d+)\$').firstMatch(mapId);
+    // Extract the trailing number of the current map identifier. The previous
+    // regular expression expected a literal dollar sign at the end of the
+    // string, which does not match ids like "mapa1". Using an end-of-string
+    // anchor ensures we capture the digits correctly.
+    final match = RegExp(r'(\d+)$').firstMatch(mapId);
     if (match == null) return;
     final nextId = 'mapa${int.parse(match.group(1)!) + 1}';
     final exists = await _mapRepo.mapExists(nextId);
