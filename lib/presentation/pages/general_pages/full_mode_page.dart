@@ -83,21 +83,27 @@ class _FullModePageState extends State<FullModePage> {
           if (maps.isEmpty) {
             return Center(child: Text('no_maps'.tr));
           }
-          return GridView.builder(
-            padding: const EdgeInsets.all(8),
-            itemCount: maps.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 1,
-            ),
-            itemBuilder: (context, i) {
-              final map = maps[i];
-              final id = map['id'] as String;
-              final unlocked = map['unlocked'] as bool? ?? false;
-              final date = map['createdAt'] as DateTime?;
-              final message = map['message'] as String?;
+          final topPadding =
+              MediaQuery.of(context).padding.top + kToolbarHeight + 24;
+          return ListView(
+            padding: EdgeInsets.fromLTRB(16, topPadding, 16, 16),
+            children: [
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: maps.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                  childAspectRatio: 1,
+                ),
+                itemBuilder: (context, i) {
+                  final map = maps[i];
+                  final id = map['id'] as String;
+                  final unlocked = map['unlocked'] as bool? ?? false;
+                  final date = map['createdAt'] as DateTime?;
+                  final message = map['message'] as String?;
               final percent = map['percent'] as int? ?? 0;
               final theme = map['bg'] as String? ?? '';
               final bgPath = theme.isNotEmpty
@@ -169,12 +175,13 @@ class _FullModePageState extends State<FullModePage> {
                       ),
                   ],
                 ),
-              );
-            },
-          );
-        },
+                );
+              },
+              ),
+            ];
+          },
+        ),
       ),
-    ),
-  );
+    );
   }
 }
