@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
-import '../../core/player_prefs.dart';
+import '../../../core/player_prefs.dart';
 import 'package:get/get.dart';
 
 import '../../../core/sfx.dart';
