@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import '../../../core/progress_storage.dart';
 import '../../../core/life_manager.dart';
 import '../../../core/sfx.dart';
 import '../../../core/leaderboard_service.dart';
+import '../../../utils/matrix_utils.dart';
 
 /// Controller for the Nonogram puzzle board.
 ///
@@ -437,11 +437,4 @@ class NonogramBoardController extends GetxController {
     }
     return Colors.blueAccent;
   }
-}
-
-List<List<int>> stringParaMatriz(String s) {
-  final listaDinamica = jsonDecode(s) as List<dynamic>;
-  return listaDinamica
-      .map((linha) => List<int>.from(linha as List<dynamic>))
-      .toList();
 }

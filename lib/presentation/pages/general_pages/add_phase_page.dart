@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../utils/matrix_utils.dart';
 
 class AddPhasePage extends StatefulWidget {
   const AddPhasePage({super.key});
@@ -69,11 +70,25 @@ class _AddPhasePageState extends State<AddPhasePage> {
         // e finalmente adiciona o tabuleiro
         final board = decoded['board'];
         if (board is Map<String, dynamic>) {
+          dynamic initial = board['initial'];
+          if (initial is List) {
+            initial = matrizParaString([
+              for (final row in initial) List<int>.from(row as List)
+            ]);
+          }
+
+          dynamic solution = board['solution'];
+          if (solution is List) {
+            solution = matrizParaString([
+              for (final row in solution) List<int>.from(row as List)
+            ]);
+          }
+
           await docRef.update({
             'board': {
               'size': board['size'],
-              'initial': board['initial'],
-              'solution': board['solution'],
+              if (initial != null) 'initial': initial,
+              'solution': solution,
               'colors': board['colors'],
             }
           });
@@ -133,16 +148,4 @@ class _AddPhasePageState extends State<AddPhasePage> {
       ),
     );
   }
-}
-
-
-List<List<int>> stringParaMatriz(String s) {
-  final listaDinamica = jsonDecode(s) as List<dynamic>;
-  return listaDinamica
-      .map((linha) => List<int>.from(linha as List<dynamic>))
-      .toList();
-}
-
-String matrizParaString(List<List<int>> matriz) {
-  return jsonEncode(matriz);
 }

@@ -3,7 +3,6 @@
 import 'dart:math';
 import 'dart:async';
 
-import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -11,6 +10,7 @@ import '../../../core/progress_storage.dart';
 import '../../../core/life_manager.dart';
 import '../../../core/sfx.dart';
 import '../../../core/leaderboard_service.dart';
+import '../../../utils/matrix_utils.dart';
 
 class TangoBoardController extends GetxController {
   /// Dimensão do tabuleiro (NxN)
@@ -370,11 +370,5 @@ class Hint {
     required this.isEqual,
     this.hidden = true,
   });
-}
-List<List<int>> stringParaMatriz(String s) {
-  final listaDinamica = jsonDecode(s) as List<dynamic>;
-  return listaDinamica
-      .map((linha) => List<int>.from(linha as List<dynamic>))
-      .toList();
 }
 
