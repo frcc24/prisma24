@@ -22,19 +22,172 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
   List<int> _completed = [];
   late final List<Offset> _relativePoints;
   String? _nextMapId;
+  bool _nextUnlocked = false;
+  String? _bgAsset;
+  String? _btnAsset;
+  int _mapTotal = 0;
+
+  String get _bgPath {
+    if (_bgAsset == null) return 'assets/images/ui/bg_gradient.png';
+    return _bgAsset!.contains('/')
+        ? _bgAsset!
+        : 'assets/images/ui/bgs/$_bgAsset';
+  }
+
+  String? get _btnPath {
+    if (_btnAsset == null) return null;
+    return _btnAsset!.contains('/')
+        ? _btnAsset!
+        : 'assets/images/ui/buttons/$_btnAsset';
+  }
+
+  Widget _outlinedText(String text, {double size = 18}) {
+    return Stack(
+      children: [
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: size,
+            fontWeight: FontWeight.bold,
+            foreground: Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 2
+              ..color = Colors.black,
+          ),
+        ),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: size,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _outlinedIcon(IconData icon, {double size = 24}) {
+    final code = String.fromCharCode(icon.codePoint);
+    return Stack(
+      children: [
+        Text(
+          code,
+          style: TextStyle(
+            fontSize: size,
+            fontFamily: icon.fontFamily,
+            package: icon.fontPackage,
+            foreground: Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1
+              ..color = Colors.black,
+          ),
+        ),
+        Text(
+          code,
+          style: TextStyle(
+            fontSize: size,
+            fontFamily: icon.fontFamily,
+            package: icon.fontPackage,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _phaseButton(BuildContext context, int i, int phaseCount) {
+    if (i >= phaseCount) return const SizedBox.shrink();
+    final onTap = () => _openPhase(context, i);
+    final completed = _completed.contains(i);
+    final btnPath = _btnPath;
+    Widget button;
+    if (btnPath != null) {
+      button = Material(
+        color: Colors.transparent,
+        elevation: 1,
+        shadowColor: Colors.black87,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Ink(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(btnPath),
+                fit: BoxFit.cover,
+              ),
+              shape: BoxShape.circle,
+            ),
+            child: Center(child: _outlinedText('${i + 1}')),
+          ),
+        ),
+      );
+    } else {
+      button = Material(
+        color: Colors.transparent,
+        elevation: 2,
+        shadowColor: Colors.black54,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Container(
+            width: 60,
+            height: 60,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.blueAccent,
+              shape: BoxShape.circle,
+            ),
+            child: _outlinedText('${i + 1}'),
+          ),
+        ),
+      );
+    }
+
+    return Stack(
+      children: [
+        button,
+        if (completed)
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: CircleAvatar(
+              radius: 10,
+              backgroundColor: Colors.green,
+              child:
+                  const Icon(Icons.check, size: 12, color: Colors.white),
+            ),
+          ),
+      ],
+    );
+  }
 
   @override
   void initState() {
     super.initState();
     _loadCompleted();
+    _loadMapAssets();
     _generatePoints();
     _checkNextMap();
   }
 
   Future<void> _loadCompleted() async {
     final storage = await ProgressStorage.getInstance();
+    final completed = storage.getCompleted(widget.mapId);
+    bool nextUnlocked = _nextUnlocked;
+    if (_nextMapId != null) {
+      nextUnlocked = storage.isMapUnlocked(_nextMapId!) || completed.length >= 8;
+    }
     setState(() {
-      _completed = storage.getCompleted(widget.mapId);
+      _completed = completed;
+      _mapTotal = storage.getMapTotal(widget.mapId);
+      _nextUnlocked = nextUnlocked;
     });
   }
 
@@ -61,6 +214,22 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
         .toList();
   }
 
+  Future<void> _loadMapAssets() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('maps')
+        .doc(widget.mapId)
+        .get();
+    if (doc.exists) {
+      final data = doc.data();
+      if (data != null) {
+        setState(() {
+          _bgAsset = data['bg'] as String?;
+          _btnAsset = data['btn'] as String?;
+        });
+      }
+    }
+  }
+
   Future<void> _checkNextMap() async {
     final match = RegExp(r'(\d+)$').firstMatch(widget.mapId);
     if (match == null) return;
@@ -70,7 +239,13 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
         .doc(nextId)
         .get();
     if (doc.exists) {
-      setState(() => _nextMapId = nextId);
+      final storage = await ProgressStorage.getInstance();
+      final unlocked = storage.isMapUnlocked(nextId) ||
+          storage.getCompleted(widget.mapId).length >= 8;
+      setState(() {
+        _nextMapId = nextId;
+        _nextUnlocked = unlocked;
+      });
     }
   }
 
@@ -130,11 +305,15 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
         final data = phases.docs[i].data();
         final game = data['game'] as String? ?? 'tango';
         if (game == 'nonogram') {
-          await Get.find<NonogramBoardController>().loadPhase(widget.mapId, i);
+          final ctrl = Get.find<NonogramBoardController>();
+          ctrl.backgroundPath = _bgPath;
+          await ctrl.loadPhase(widget.mapId, i);
           Navigator.of(Get.context!, rootNavigator: true).pop(); //fechar o dialog
           await Navigator.pushNamed(Get.context!, '/nonogram');
         } else {
-          await Get.find<TangoBoardController>().loadPhase(widget.mapId, i);
+          final ctrl = Get.find<TangoBoardController>();
+          ctrl.backgroundPath = _bgPath;
+          await ctrl.loadPhase(widget.mapId, i);
           Navigator.of(Get.context!, rootNavigator: true).pop(); //fechar o dialog
           await Navigator.pushNamed(Get.context!, '/tango');
         }
@@ -151,17 +330,25 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.black54,
         elevation: 0,
+        centerTitle: true,
+        title: Text('$_mapTotal'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: LivesBar(),
+          ),
+        ],
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/ui/bg_gradient.png'),
+            image: AssetImage(_bgPath),
             fit: BoxFit.cover,
           ),
         ),
@@ -190,12 +377,6 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
                 }
                 return Stack(
                   children: [
-                    const Positioned(
-                      top: 120,
-                      left: 8,
-                      right: 8,
-                      child: LivesBar(),
-                    ),
                     CustomPaint(
                       size: Size(constraints.maxWidth, constraints.maxHeight),
                       painter: _PathPainter(points),
@@ -204,51 +385,83 @@ class _FullModeMapPageState extends State<FullModeMapPage> {
                       Positioned(
                         left: points[i].dx - 30,
                         top: points[i].dy - 30,
-                        child: Stack(
-                          children: [
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueAccent,
-                                shape: const CircleBorder(),
-                                padding: const EdgeInsets.all(20),
-                              ),
-                              onPressed: i < phaseCount
-                                  ? () => _openPhase(context, i)
-                                  : null,
-                              child: Text('${i + 1}'),
-                            ),
-                            if (_completed.contains(i))
-                              Positioned(
-                                bottom: 4,
-                                right: 4,
-                                child: CircleAvatar(
-                                  radius: 10,
-                                  backgroundColor: Colors.green,
-                                  child: const Icon(Icons.check,
-                                      size: 12, color: Colors.white),
-                                ),
-                            ),
-                          ],
-                        ),
+                        child: _phaseButton(context, i, phaseCount),
                       ),
                     if (nextPoint != null)
                       Positioned(
                         left: nextPoint.dx - 30,
                         top: nextPoint.dy - 30,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.purple,
-                            shape: const CircleBorder(),
-                            padding: const EdgeInsets.all(20),
-                          ),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => FullModeMapPage(mapId: _nextMapId!),
-                              settings: const RouteSettings(name: '/full_map'),
+                        child: Material(
+                          color: Colors.transparent,
+                          elevation: 4,
+                          shadowColor: Colors.black87,
+                          shape: const CircleBorder(),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () async {
+                              if (_nextUnlocked) {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => FullModeMapPage(mapId: _nextMapId!),
+                                    settings: const RouteSettings(name: '/full_map'),
+                                  ),
+                                );
+                              } else {
+                                final confirm = await showDialog<bool>(
+                                  context: context,
+                                  builder: (_) => AlertDialog(
+                                    title: Text('unlock_map_q'.tr),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context, false),
+                                        child: Text('cancel'.tr),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () => Navigator.pop(context, true),
+                                        child: Text('watch_ad'.tr),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                if (confirm == true && _nextMapId != null) {
+                                  final storage = await ProgressStorage.getInstance();
+                                  await storage.unlockMap(_nextMapId!);
+                                  setState(() => _nextUnlocked = true);
+                                  Get.snackbar('Ok', 'unlocked'.tr,
+                                      snackPosition: SnackPosition.BOTTOM);
+                                }
+                              }
+                            },
+                            customBorder: const CircleBorder(),
+                            child: Ink(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                image: _btnPath != null
+                                    ? DecorationImage(
+                                        image: AssetImage(_btnPath!),
+                                        fit: BoxFit.cover,
+                                        colorFilter: !_nextUnlocked
+                                            ? const ColorFilter.mode(
+                                                Colors.black45,
+                                                BlendMode.srcATop,
+                                              )
+                                            : null,
+                                      )
+                                    : null,
+                                color: _btnPath == null
+                                    ? Colors.purple.withOpacity(_nextUnlocked ? 1 : 0.4)
+                                    : null,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: _nextUnlocked
+                                    ? _outlinedIcon(Icons.arrow_forward)
+                                    : _outlinedIcon(Icons.lock),
+                              ),
                             ),
                           ),
-                          child: const Icon(Icons.arrow_forward),
                         ),
                       ),
                   ],

@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/progress_storage.dart';
 import '../../../core/life_manager.dart';
+import '../../../core/sfx.dart';
+import '../../../core/leaderboard_service.dart';
 
 class TangoBoardController extends GetxController {
   /// Dimensão do tabuleiro (NxN)
@@ -40,6 +42,8 @@ class TangoBoardController extends GetxController {
   Timer? _timer;
   int _baseScore = 0;
 
+  String backgroundPath = 'assets/images/ui/bg_gradient.png';
+
   String? currentMapId;
   int? currentPhaseIndex;
 
@@ -59,10 +63,10 @@ class TangoBoardController extends GetxController {
   void stopTimer() => _stopTimer();
 
   void _updateScore() {
-    final timePen = elapsedSeconds.value ~/ 2;
+    final timePen = (elapsedSeconds.value ~/ 2) * 10;
     final clickLimit = sizeN.value * sizeN.value;
-    final clickPen = max(0, clicks.value - clickLimit) * 2;
-    final hintPen = hintsUsed.value * 50;
+    final clickPen = max(0, clicks.value - clickLimit) * 20;
+    final hintPen = hintsUsed.value * 500;
     score.value = max(0, _baseScore - timePen - clickPen - hintPen);
     if (score.value <= 0) {
       _handleLoss();
@@ -70,6 +74,7 @@ class TangoBoardController extends GetxController {
   }
 
   void _handleLoss() {
+    Sfx().fail();
     if (_timer != null) {
       _stopTimer();
     }
@@ -200,6 +205,7 @@ class TangoBoardController extends GetxController {
   /// Se não houver mais dicas para revelar, não faz nada.
   void revealHint() {
     isLoading.value = true;
+    Sfx().tap();
     // Filtra apenas as dicas que ainda estão ocultas
     final ocultas = hints.where((h) => h.hidden).toList();
     if (ocultas.isEmpty) return;
@@ -230,6 +236,7 @@ class TangoBoardController extends GetxController {
   /// Cicla o estado de uma célula: 0 -> 1 -> 2 -> 0
   void cycleTile(int row, int col) {
     isLoading.value = true;
+    Sfx().tap();
     // 1) Se veio pré-preenchido, bloqueia alteração
     if (initialMatrix[row][col] != 0) return;
 
@@ -248,10 +255,13 @@ class TangoBoardController extends GetxController {
 
     // 5) Se terminado, exibe o diálogo
     if (_checkCompletion()) {
+      Sfx().win();
       _stopTimer();
       if (currentMapId != null && currentPhaseIndex != null) {
         ProgressStorage.getInstance().then(
             (p) => p.addCompletion(currentMapId!, currentPhaseIndex!));
+        LeaderboardService()
+            .savePhaseScore(currentMapId!, currentPhaseIndex!, score.value);
       }
       Get.dialog(
         AlertDialog(
@@ -290,7 +300,7 @@ void resetBoard() {
     clicks.value = 0;
     hintsUsed.value = 0;
     elapsedSeconds.value = 0;
-    _baseScore = sizeN.value * sizeN.value * 5;
+    _baseScore = 10000;
     score.value = _baseScore;
     _stopTimer();
     _startTimer();

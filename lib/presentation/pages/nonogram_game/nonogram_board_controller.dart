@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/progress_storage.dart';
 import '../../../core/life_manager.dart';
+import '../../../core/sfx.dart';
+import '../../../core/leaderboard_service.dart';
 
 /// Controller for the Nonogram puzzle board.
 ///
@@ -31,6 +33,8 @@ class NonogramBoardController extends GetxController {
   RxBool isLoading = false.obs;
   late List<List<int>> solutionMatrix;
   final RxList<List<int>> currentMatrix = <List<int>>[].obs;
+
+  String backgroundPath = 'assets/images/ui/bg_gradient.png';
 
   String? currentMapId;
   int? currentPhaseIndex;
@@ -59,16 +63,18 @@ class NonogramBoardController extends GetxController {
   void stopTimer() => _stopTimer();
 
   void _updateScore() {
-    final timePen = elapsedSeconds.value ~/ 2;
+    final timePen = (elapsedSeconds.value ~/ 2) * 10;
     final clickLimit = size.value * size.value;
-    final clickPen = max(0, clicks.value - clickLimit) * 2;
-    score.value = max(0, _baseScore - timePen - clickPen);
+    final clickPen = max(0, clicks.value - clickLimit) * 20;
+    final hintPen = hintsUsed.value * 500;
+    score.value = max(0, _baseScore - timePen - clickPen - hintPen);
     if (score.value <= 0) {
       _handleLoss();
     }
   }
 
   void _handleLoss() {
+    Sfx().fail();
     _stopTimer();
     LifeManager().loseLife();
     Get.dialog(
@@ -91,9 +97,13 @@ class NonogramBoardController extends GetxController {
 
   final RxInt elapsedSeconds = 0.obs;
   final RxInt clicks = 0.obs;
+  final RxInt hintsUsed = 0.obs;
   final RxInt score = 0.obs;
   Timer? _timer;
   int _baseScore = 0;
+
+  final Random _random = Random();
+  final RxList<List<bool>> revealedMatrix = <List<bool>>[].obs;
 
   @override
   void onInit() {
@@ -118,9 +128,9 @@ class NonogramBoardController extends GetxController {
     final board = data['board'] as Map<String, dynamic>;
     size.value = board['size'] as int;
     solutionMatrix = [
-      for (final row in board['solution'] as List)
-        List<int>.from(row as List)
+      for (final row in board['solution'] as List) List<int>.from(row as List)
     ];
+
     // Colors configuration
     final colorsField = board['colors'];
     if (colorsField is List && colorsField.isNotEmpty) {
@@ -132,12 +142,43 @@ class NonogramBoardController extends GetxController {
         selectedTileColor = _parseColor(colorsField[1]);
       }
     }
+
+    // Setup revealed matrix
+    revealedMatrix.assignAll(
+      List.generate(size.value, (_) => List.filled(size.value, false)),
+    );
+    final initialField = board['initial'];
+    if (initialField != null) {
+      List<List<int>> init;
+      if (initialField is String) {
+        init = stringParaMatriz(initialField);
+      } else {
+        init = [
+          for (final row in initialField as List) List<int>.from(row as List)
+        ];
+      }
+      for (int i = 0; i < size.value; i++) {
+        for (int j = 0; j < size.value; j++) {
+          if (init[i][j] == 1) revealedMatrix[i][j] = true;
+        }
+      }
+    } else {
+      final total = size.value * size.value;
+      int revealCount = max(1, (total * 0.1).round());
+      final indices = List<int>.generate(total, (i) => i)..shuffle(_random);
+      for (int k = 0; k < revealCount; k++) {
+        final idx = indices[k];
+        final r = idx ~/ size.value;
+        final c = idx % size.value;
+        revealedMatrix[r][c] = true;
+      }
+    }
+
     currentMatrix.assignAll(
       List.generate(size.value, (_) => List.filled(size.value, 0)),
     );
     rowCounts = [
-      for (final row in solutionMatrix)
-        row.where((e) => e == 1).length
+      for (final row in solutionMatrix) row.where((e) => e == 1).length
     ];
     colCounts = List.generate(
       size.value,
@@ -147,16 +188,24 @@ class NonogramBoardController extends GetxController {
 
   void toggleTile(int row, int col) {
     isLoading.value = true;
+    Sfx().tap();
+    if (revealedMatrix.isNotEmpty && revealedMatrix[row][col]) {
+      isLoading.value = false;
+      return;
+    }
     final newVal = currentMatrix[row][col] == 1 ? 0 : 1;
     currentMatrix[row][col] = newVal;
     currentMatrix.refresh();
     clicks.value++;
     _updateScore();
     if (_checkCompletion()) {
+      Sfx().win();
       _stopTimer();
       if (currentMapId != null && currentPhaseIndex != null) {
         ProgressStorage.getInstance().then(
             (p) => p.addCompletion(currentMapId!, currentPhaseIndex!));
+        LeaderboardService()
+            .savePhaseScore(currentMapId!, currentPhaseIndex!, score.value);
       }
       Get.dialog(
         AlertDialog(
@@ -193,13 +242,46 @@ class NonogramBoardController extends GetxController {
     for (int i = 0; i < size.value; i++) {
       currentMatrix[i] = List<int>.filled(size.value, 0);
     }
+    for (int i = 0; i < size.value; i++) {
+      for (int j = 0; j < size.value; j++) {
+        if (revealedMatrix.isNotEmpty && revealedMatrix[i][j]) {
+          currentMatrix[i][j] = solutionMatrix[i][j];
+        }
+      }
+    }
     currentMatrix.refresh();
+    hintsUsed.value = 0;
     clicks.value = 0;
     elapsedSeconds.value = 0;
-    _baseScore = size.value * size.value * 5;
+    _baseScore = 10000;
     score.value = _baseScore;
     _stopTimer();
     _startTimer();
+  }
+
+  void revealHint() {
+    isLoading.value = true;
+    Sfx().tap();
+    final List<List<int>> available = [];
+    for (int i = 0; i < size.value; i++) {
+      for (int j = 0; j < size.value; j++) {
+        if (!revealedMatrix[i][j]) {
+          available.add([i, j]);
+        }
+      }
+    }
+    if (available.isNotEmpty) {
+      final choice = available[_random.nextInt(available.length)];
+      final r = choice[0];
+      final c = choice[1];
+      revealedMatrix[r][c] = true;
+      currentMatrix[r][c] = solutionMatrix[r][c];
+      hintsUsed.value++;
+      currentMatrix.refresh();
+      revealedMatrix.refresh();
+      _updateScore();
+    }
+    isLoading.value = false;
   }
 
   /// Carrega uma fase armazenada no Firestore.
@@ -235,12 +317,24 @@ class NonogramBoardController extends GetxController {
           for (final row in solutionField as List) List<int>.from(row as List)
         ];
       }
+      final initialField = board['initial'];
+      List<List<int>>? initial;
+      if (initialField != null) {
+        if (initialField is String) {
+          initial = stringParaMatriz(initialField);
+        } else {
+          initial = [
+            for (final row in initialField as List) List<int>.from(row as List)
+          ];
+        }
+      }
       final colors = board['colors'];
       loadFromJson({
         'board': {
           'size': n,
           'solution': solution,
           'colors': colors,
+          if (initial != null) 'initial': initial,
         }
       });
       resetBoard();

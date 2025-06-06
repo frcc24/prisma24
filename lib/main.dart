@@ -20,6 +20,7 @@ import 'presentation/pages/nonogram_game/nonogram_board_controller.dart'
     show NonogramBoardController;
 import 'presentation/pages/nonogram_game/nonogram_board_page.dart';
 import 'core/life_manager.dart';
+import 'core/sfx.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,6 +35,8 @@ void main() async {
       const Settings(persistenceEnabled: true);
 
   await LifeManager().init();
+
+  await Sfx().init();
 
   final prefs = await SharedPreferences.getInstance();
   final code = prefs.getString('locale') ?? 'pt_BR';

@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/player_prefs.dart';
 import 'package:get/get.dart';
 
 import '../../../core/sfx.dart';
@@ -89,10 +89,6 @@ class GamePage extends ConsumerWidget {
       .add({'name': name, 'score': score, 'ts': FieldValue.serverTimestamp()});
 
   /* ───────── Diálogo de fim ───────── */
-  Future<String> getPlayerName() async {
-  final prefs = await SharedPreferences.getInstance();
-  return prefs.getString('player_name') ?? 'Jogador';
-}
 
   void _showEndDialog(
       BuildContext context, WidgetRef ref, bool won, int elapsed) {
@@ -226,10 +222,14 @@ class GamePage extends ConsumerWidget {
       ),
       extendBodyBehindAppBar: true,
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/ui/bg_gradient.png'),
+            image: const AssetImage('assets/images/ui/bg_gradient.png'),
             fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.4),
+              BlendMode.darken,
+            ),
           ),
         ),
         child: SafeArea(
@@ -402,7 +402,6 @@ class _ColorDot extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: selected ? 3 : 1.5),
         boxShadow: [
           if (selected) const BoxShadow(blurRadius: 6, spreadRadius: 1),
         ],

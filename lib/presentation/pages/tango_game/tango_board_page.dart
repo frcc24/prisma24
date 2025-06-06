@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/life_manager.dart';
+import '../../../core/sfx.dart';
 import 'tango_board_controller.dart';
 
 class TangoBoardPage extends GetView<TangoBoardController> {
@@ -55,16 +56,21 @@ class TangoBoardPage extends GetView<TangoBoardController> {
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: () {
               controller.resetBoard();
+              Sfx().tap();
             },
             tooltip: 'restart'.tr,
           ),
         ],
       ),
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/ui/bg_gradient.png'),
+            image: AssetImage(controller.backgroundPath),
             fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.4),
+              BlendMode.darken,
+            ),
           ),
         ),
         child: SafeArea(
@@ -86,6 +92,7 @@ class TangoBoardPage extends GetView<TangoBoardController> {
                       onPressed: remaining > 0
                           ? () {
                               controller.revealHint();
+                              Sfx().tap();
                             }
                           : null, // desabilita se não há mais dicas
                     ),
@@ -148,10 +155,14 @@ class TangoBoardPage extends GetView<TangoBoardController> {
                         (constraints.maxWidth - totalSpacing) / n;
 
                     return Container(
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage('assets/images/ui/bg_gradient.png'),
+                          image: AssetImage(controller.backgroundPath),
                           fit: BoxFit.cover,
+                          colorFilter: ColorFilter.mode(
+                            Colors.black.withOpacity(0.4),
+                            BlendMode.darken,
+                          ),
                         ),
                       ),
                       child: Stack(
