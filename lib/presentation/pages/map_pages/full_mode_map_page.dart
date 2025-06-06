@@ -9,11 +9,11 @@ import '../../widgets/outlined_icon.dart';
 
 class FullModeMapPage extends GetView<FullModeMapController> {
   final String mapId;
-  const FullModeMapPage({super.key, required this.mapId});
+  const FullModeMapPage({super.key, required this.mapId}) : super(tag: mapId);
 
   @override
   Widget build(BuildContext context) {
-    Get.put(FullModeMapController(mapId));
+    Get.put(FullModeMapController(mapId), tag: mapId);
     return Obx(() {
       return Scaffold(
         extendBodyBehindAppBar: true,
