@@ -66,6 +66,7 @@ class AppTranslations extends Translations {
       'portuguese': 'Portuguese',
       'english': 'English',
       'error': 'Error',
+      'error_loading': 'Error loading data',
       'phase_not_impl': 'Phase not implemented',
     },
     'pt_BR': {
@@ -131,6 +132,7 @@ class AppTranslations extends Translations {
       'portuguese': 'Português',
       'english': 'Inglês',
       'error': 'Erro',
+      'error_loading': 'Erro ao carregar',
       'phase_not_impl': 'Fase nao implementada',
     },
   };
