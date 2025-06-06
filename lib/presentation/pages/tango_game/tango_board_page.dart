@@ -51,6 +51,16 @@ class TangoBoardPage extends GetView<TangoBoardController> {
       },
       child: Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () async {
+            if (await _confirmExit(context) && context.mounted) {
+              Navigator.of(context).popUntil(
+                ModalRoute.withName('/full_map'),
+              );
+            }
+          },
+        ),
         title: Text('tango_puzzle'.tr),
         backgroundColor: Colors.black,
         actions: [
