@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import '../../../core/progress_storage.dart';
 import '../../../core/life_manager.dart';
 import '../../../core/sfx.dart';
+import '../../../core/leaderboard_service.dart';
 
 class TangoBoardController extends GetxController {
   /// Dimensão do tabuleiro (NxN)
@@ -257,6 +258,8 @@ class TangoBoardController extends GetxController {
       if (currentMapId != null && currentPhaseIndex != null) {
         ProgressStorage.getInstance().then(
             (p) => p.addCompletion(currentMapId!, currentPhaseIndex!));
+        LeaderboardService()
+            .savePhaseScore(currentMapId!, currentPhaseIndex!, score.value);
       }
       Get.dialog(
         AlertDialog(

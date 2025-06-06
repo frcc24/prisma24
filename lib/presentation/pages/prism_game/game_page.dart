@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/player_prefs.dart';
 import 'package:get/get.dart';
 
 import '../../../core/sfx.dart';
@@ -89,10 +89,6 @@ class GamePage extends ConsumerWidget {
       .add({'name': name, 'score': score, 'ts': FieldValue.serverTimestamp()});
 
   /* ───────── Diálogo de fim ───────── */
-  Future<String> getPlayerName() async {
-  final prefs = await SharedPreferences.getInstance();
-  return prefs.getString('player_name') ?? 'Jogador';
-}
 
   void _showEndDialog(
       BuildContext context, WidgetRef ref, bool won, int elapsed) {
